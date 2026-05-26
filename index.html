@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyHermes 易墨 - 免配置、零依赖的原生国风 AI Agent 桌面客户端</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: 引入思源宋体与极客无衬线字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+                        serif: ['"Noto Serif SC"', 'serif'],
+                        mono: ['"Fira Code"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            porcelain: '#FAFAFD', // 温润白瓷
+                            glaze: '#F2F4F7',     // 晶莹釉灰
+                            darkCharcoal: '#0F121D', // 深邃黛墨
+                            accent: '#C59B27',    // 雅致御金
+                            accentHover: '#E5B93C',
+                            cinnabar: '#BD2E24',  // 朱砂红
+                            cinnabarHover: '#D93829',
+                            cardBg: 'rgba(255, 255, 255, 0.75)',
+                            borderLight: 'rgba(15, 18, 29, 0.05)'
+                        }
+                    },
+                    boxShadow: {
+                        'soft-warm': '0 20px 50px rgba(15, 18, 29, 0.04)',
+                        'gold-glow': '0 10px 30px rgba(197, 155, 39, 0.08)',
+                        'red-glow': '0 15px 40px rgba(189, 46, 36, 0.12)',
+                        'app-shell': '0 30px 70px rgba(15, 18, 29, 0.08)',
+                        'glass-inner': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.6)'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* 1. 轻量高精度微点阵背景 */
+        .dot-matrix {
+            background-size: 24px 24px;
+            background-image: radial-gradient(rgba(15, 18, 29, 0.035) 1px, transparent 1px);
+        }
+        
+        /* 2. 宣纸极微细丝纤维纹理 - 渲染纸质艺术气息 */
+        .paper-grain {
+            position: relative;
+        }
+        .paper-grain::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.015;
+            pointer-events: none;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperNoise)'/%3E%3C/svg%3E");
+        }
+
+        /* 3. 商业大师级柔光 Spotlight 渐变背景 */
+        .light-glow-1 {
+            background: radial-gradient(circle at 15% 20%, rgba(197, 155, 39, 0.06) 0%, rgba(255,255,255,0) 60%);
+        }
+        .light-glow-2 {
+            background: radial-gradient(circle at 85% 35%, rgba(189, 46, 36, 0.04) 0%, rgba(255,255,255,0) 50%);
+        }
+        .light-glow-3 {
+            background: radial-gradient(circle at 50% 80%, rgba(13, 148, 136, 0.04) 0%, rgba(255,255,255,0) 60%);
+        }
+
+        /* 4. 尊贵金色与黛墨渐变文字 */
+        .text-premium {
+            background: linear-gradient(135deg, #0F121D 20%, #856414 70%, #BD2E24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 5. 经典朱砂泥古法印章 */
+        .seal-stamp {
+            background: radial-gradient(circle at center, #D32F2F 0%, #B71C1C 100%);
+            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.3), inset 0 1px 0 rgba(255,255,255,0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 臻品微透白瓷卡片 (Light Glassmorphism) */
+        .ceramic-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(15, 18, 29, 0.05);
+            backdrop-filter: blur(20px);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 12px 36px rgba(15, 18, 29, 0.025);
+        }
+        .ceramic-card:hover {
+            border-color: rgba(197, 155, 39, 0.25);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9), 0 15px 45px rgba(197, 155, 39, 0.05);
+        }
+
+        /* 语法高亮 (白瓷亮色) */
+        .syntax-key { color: #E11D48; font-weight: 500; }
+        .syntax-val { color: #059669; }
+        .syntax-str { color: #0284C7; }
+        .syntax-comment { color: #8E9AA8; }
+
+        /* 隐藏滚动条 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-brand-porcelain text-brand-darkCharcoal font-sans antialiased dot-matrix paper-grain min-h-screen relative overflow-x-hidden select-none">
+
+    <!-- 多层科技氛围环境光叠加 -->
+    <div class="absolute inset-0 light-glow-1 pointer-events-none z-0"></div>
+    <div class="absolute inset-0 light-glow-2 pointer-events-none z-0"></div>
+    <div class="absolute inset-0 light-glow-3 pointer-events-none z-0"></div>
+
+    <!-- 顶部状态通知条 -->
+    <div class="relative z-50 bg-[#BD2E24]/5 border-b border-[#BD2E24]/10 px-4 py-2 text-center text-[10px] sm:text-[11px] tracking-widest font-mono text-brand-cinnabar uppercase">
+        <span class="inline-flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-cinnabar animate-pulse"></span>
+            <span>EasyHermes desktop client v1.0 released. natively engineered for secure offline operations.</span>
+        </span>
+    </div>
+
+    <!-- 顶栏导航 -->
+    <header class="sticky top-0 z-40 bg-brand-porcelain/60 backdrop-blur-xl border-b border-black/[0.03] px-6 lg:px-12 py-4.5 transition-all">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <!-- 品牌徽标 -->
+            <div class="flex items-center space-x-4">
+                <div class="seal-stamp text-white font-serif font-black w-9.5 h-9.5 flex items-center justify-center rounded text-base transition-transform duration-500 hover:rotate-[360deg] cursor-pointer">
+                    易
+                </div>
+                <div>
+                    <span class="text-brand-darkCharcoal text-lg font-bold tracking-widest font-serif block leading-tight">EasyHermes</span>
+                    <span class="text-[9px] text-brand-accent tracking-widest block font-mono font-semibold">WORKSPACE NATIVE AI AGENT</span>
+                </div>
+            </div>
+            
+            <!-- 菜单 -->
+            <nav class="hidden lg:flex items-center space-x-10 text-xs tracking-widest font-serif text-gray-500 font-medium">
+                <a href="#philosophy" class="hover:text-brand-darkCharcoal transition-colors duration-200">极简致美</a>
+                <a href="#features" class="hover:text-brand-darkCharcoal transition-colors duration-200">核心绝艺</a>
+                <a href="#cloud-bookcase" class="hover:text-brand-darkCharcoal transition-colors duration-200">云端书斋</a>
+                <a href="#sandbox" class="hover:text-brand-darkCharcoal transition-colors duration-200">墨境沙盒</a>
+                <a href="#hardware" class="hover:text-brand-darkCharcoal transition-colors duration-200">物理灵兽</a>
+            </nav>
+
+            <!-- 主推 CTA -->
+            <div>
+                <a href="#cloud-bookcase" class="bg-brand-cinnabar hover:bg-[#BD2E24] text-white px-5 py-2 rounded-md text-[11px] tracking-widest font-serif font-bold transition-all duration-300 shadow-soft-warm">
+                    获取安装包
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主视觉区 (Hero Section) -->
+    <main id="hero" class="relative pt-12 pb-24 lg:pt-20 lg:pb-32 px-6 max-w-7xl mx-auto z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            
+            <!-- 左侧内容区 -->
+            <div class="lg:col-span-6 space-y-8">
+                <div class="inline-flex items-center space-x-2.5 px-3 py-1 bg-white border border-brand-accent/25 rounded-md text-[11px] text-brand-accent font-mono font-semibold shadow-sm">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-brand-accent animate-ping"></span>
+                    <span>Nous Research / Hermes Core Windows Native Wrapper</span>
+                </div>
+                
+                <div class="space-y-4">
+                    <h1 class="title-serif text-5xl sm:text-6xl lg:text-7xl text-brand-darkCharcoal leading-[1.1] tracking-wide font-serif font-black">
+                        一屏烟雨，<br/>
+                        <span class="text-premium font-serif font-black">一键乾坤。</span>
+                    </h1>
+                    <p class="text-sm sm:text-base text-gray-500 font-serif leading-relaxed max-w-xl">
+                        免环境配置、零依赖、纯本地。EasyHermes 是一款专为 Windows/macOS 打造的极速自进化 AI Agent 桌面系统。自带嵌入式运行架构，双击开箱，即刻架驭局域网物理外设。
+                    </p>
+                </div>
+
+                <!-- 尊贵技术参数面板 -->
+                <div class="grid grid-cols-3 gap-6 py-6 border-t border-b border-black/[0.04] max-w-xl font-serif">
+                    <div class="space-y-1">
+                        <span class="block text-2xl sm:text-3xl font-light text-brand-accent">0 依赖</span>
+                        <span class="block text-[10px] text-gray-400">内置 Python 3.11 闭环打包</span>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="block text-2xl sm:text-3xl font-light text-brand-darkCharcoal">4 类</span>
+                        <span class="block text-[10px] text-gray-400">内置免 Key 预设主力大模型</span>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="block text-2xl sm:text-3xl font-light text-brand-cinnabar">30+ 门</span>
+                        <span class="block text-[10px] text-gray-400">本地化工作流自学式技能</span>
+                    </div>
+                </div>
+
+                <!-- 快速指引导航：完美承载本地下载与飞书Wiki跳转 -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                    <a href="#cloud-bookcase" class="bg-brand-darkCharcoal hover:bg-black text-white font-serif px-6 py-3.5 rounded-md text-xs tracking-widest font-bold transition-all duration-300 shadow-md flex items-center justify-center space-x-2.5">
+                        <i class="fas fa-download"></i>
+                        <span>本地win/mac安装包下载</span>
+                    </a>
+                    <a href="https://my.feishu.cn/wiki/OFlCwnuLei057MknvRycbkL5nsb?from=from_copylink" target="_blank" class="border border-black/10 hover:border-black/30 text-brand-darkCharcoal font-serif px-6 py-3.5 rounded-md text-xs tracking-widest font-semibold transition-all duration-300 flex items-center justify-center space-x-2.5 bg-white/45 hover:bg-white">
+                        <i class="fas fa-book-open"></i>
+                        <span>了解产品详情</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- 右侧：亮色系高保真 EasyHermes 桌面客户端 Mockup -->
+            <div class="lg:col-span-6 relative mt-8 lg:mt-0">
+                <!-- 光源辐射层 -->
+                <div class="absolute -inset-2 rounded-2xl bg-gradient-to-r from-brand-accent/5 to-brand-cinnabar/5 opacity-40 blur-3xl"></div>
+                
+                <!-- 亮色桌面端 App 外壳 -->
+                <div class="relative bg-white border border-black/[0.06] rounded-2xl shadow-app-shell overflow-hidden">
+                    
+                    <!-- App 标题栏 -->
+                    <div class="flex items-center justify-between bg-[#F5F7FA] border-b border-black/[0.04] py-3.5 px-5">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-[#FF5F56] inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-[#FFBD2E] inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-[#27C93F] inline-block"></span>
+                            <span class="pl-3 text-[11px] font-bold text-gray-500 font-serif">EasyHermes Desktop (亮雅白)</span>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="text-[10px] font-mono text-brand-accent bg-brand-accent/5 px-2 py-0.5 rounded border border-brand-accent/20 font-bold">READY (8642)</span>
+                            <i class="fas fa-cog text-gray-400 hover:text-brand-darkCharcoal transition-colors cursor-pointer text-xs"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- App 内部多栏布局 -->
+                    <div class="grid grid-cols-12 h-[420px]">
+                        
+                        <!-- 1. 左侧轻量导航栏 -->
+                        <div class="col-span-3 bg-[#EEF1F6] border-r border-black/[0.03] p-3 flex flex-col justify-between">
+                            <div class="space-y-4">
+                                <div class="text-[9px] font-mono text-gray-400 tracking-wider uppercase pl-2">主控菜单</div>
+                                <div class="space-y-1">
+                                    <div class="flex items-center space-x-2 px-2.5 py-1.5 rounded-md bg-white text-brand-darkCharcoal text-[11px] font-serif font-bold shadow-sm cursor-pointer">
+                                        <i class="fas fa-comment-dots text-brand-accent text-[10px]"></i>
+                                        <span>大殿聊天</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2 px-2.5 py-1.5 rounded-md hover:bg-white/50 text-gray-500 text-[11px] font-serif cursor-pointer transition-colors">
+                                        <i class="fas fa-sliders-h text-[10px]"></i>
+                                        <span>网关设置</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2 px-2.5 py-1.5 rounded-md hover:bg-white/50 text-gray-500 text-[11px] font-serif cursor-pointer transition-colors">
+                                        <i class="fas fa-brain text-[10px]"></i>
+                                        <span>长期记忆</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 简要硬件连接微状态 -->
+                            <div class="bg-white rounded-md p-2 border border-black/[0.04]">
+                                <div class="text-[8px] font-mono text-gray-400 uppercase">IoT Device</div>
+                                <div class="text-[10px] font-serif text-brand-accent flex items-center justify-between mt-1">
+                                    <span class="font-bold">ESP32-S3</span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 2. 主聊天会话区 -->
+                        <div class="col-span-9 bg-white p-4 flex flex-col justify-between relative overflow-hidden">
+                            <!-- 水墨山水背景图 -->
+                            <div class="absolute inset-0 opacity-[0.03] pointer-events-none flex items-end justify-center">
+                                <svg class="w-full h-36" viewBox="0 0 500 200" fill="none">
+                                    <path d="M0 200C60 140 120 110 180 140C240 170 300 130 360 80C420 30 460 70 500 200" stroke="#000" stroke-width="2"/>
+                                    <path d="M30 200C110 110 170 150 240 110C310 70 370 100 450 200" stroke="#000" stroke-width="1" stroke-dasharray="5 5"/>
+                                </svg>
+                            </div>
+
+                            <!-- 滚动聊天区 -->
+                            <div class="space-y-4 overflow-y-auto no-scrollbar flex-grow z-10">
+                                <!-- 墨奴气泡 -->
+                                <div class="space-y-1.5">
+                                    <div class="text-[9px] font-mono text-brand-accent uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fas fa-feather"></i> [易墨墨奴] (SOUL.md ACTIVE)
+                                    </div>
+                                    <div class="p-3 bg-[#F2F4F7] border border-black/[0.02] rounded-lg rounded-tl-none text-xs leading-relaxed max-w-[90%] font-serif text-brand-darkCharcoal">
+                                        阁下，我已经扫描并加载工作空间。当前运行于 <span class="text-brand-cinnabar font-bold">纯净 Windows 便携环境</span>，无需搭建 Python 环境，随时静候调遣。
+                                    </div>
+                                </div>
+                                
+                                <!-- 用户气泡 -->
+                                <div class="space-y-1.5 flex flex-col items-end">
+                                    <div class="text-[9px] font-mono text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                        [阁下] <i class="fas fa-user-ninja"></i>
+                                    </div>
+                                    <div class="p-3 bg-brand-cinnabar/5 border border-brand-cinnabar/15 rounded-lg rounded-tr-none text-xs leading-relaxed max-w-[90%] text-brand-darkCharcoal">
+                                        帮我将昨天的财务数据自动转换并生成一个 Excel 报表。
+                                    </div>
+                                </div>
+
+                                <!-- 墨奴动态反馈 -->
+                                <div class="space-y-1.5">
+                                    <div class="text-[9px] font-mono text-[#059669] uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fas fa-terminal"></i> [调用自动工具 - xlsx]
+                                    </div>
+                                    <div class="p-2.5 bg-brand-glaze border border-black/[0.04] rounded-md text-[10px] text-emerald-700 font-mono leading-tight">
+                                        > C:\Users\Admin> python -c "import openpyxl; wb=openpyxl.Workbook()..." <br/>
+                                        ✔ 成功: workspace/output_report.xlsx 已保存在工程目录。
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 3. 下部交互输入区 -->
+                            <div class="mt-3 border-t border-black/[0.04] pt-3 z-10">
+                                <div class="bg-brand-glaze border border-black/[0.04] rounded-md px-3 py-2 flex items-center justify-between">
+                                    <div class="flex items-center space-x-2 text-xs text-gray-400">
+                                        <i class="fas fa-plus hover:text-brand-darkCharcoal cursor-pointer"></i>
+                                        <input type="text" placeholder="向易墨交付本地命令..." class="bg-transparent border-none outline-none text-brand-darkCharcoal placeholder-gray-400 text-[11px] w-48 font-serif" disabled>
+                                    </div>
+                                    <div class="flex items-center space-x-2.5">
+                                        <span class="text-[9px] text-gray-400 font-mono">⌘ + Enter</span>
+                                        <i class="fas fa-paper-plane text-brand-cinnabar hover:text-brand-cinnabarHover cursor-pointer text-[10px]"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- 极客核心理念 (致简篇) -->
+    <section id="philosophy" class="py-24 bg-white border-t border-b border-black/[0.03] relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-20 space-y-4">
+                <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 极简致美 /</span>
+                <h2 class="title-serif text-3xl md:text-4xl text-brand-darkCharcoal font-black">告别繁杂配置，让 Agent 优雅落地</h2>
+                <p class="text-gray-500 font-serif text-sm">
+                    标准版原本需要耗费工程师几个小时 of 依赖拉取和环境纠错，而我们通过极致的技术封装，将其打磨为双击即燃的艺术品。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+                <!-- 零门槛 -->
+                <div class="ceramic-card p-8 rounded-xl transition-all duration-300 group">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-brand-cinnabar/5 text-brand-cinnabar mb-6 group-hover:scale-105 transition-transform border border-brand-cinnabar/10">
+                        <i class="fas fa-cubes text-base"></i>
+                    </div>
+                    <h3 class="title-serif text-lg text-brand-darkCharcoal mb-3 font-bold">无拘无束 零依赖打包</h3>
+                    <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                        彻底摆脱臃肿庞杂的 `uv sync` 与外部依赖。程序内部高度整合了微型 Python 解释器。即用即启，坚决不向本地宿主系统遗留垃圾项。
+                    </p>
+                </div>
+
+                <!-- Windows 原生适配 -->
+                <div class="ceramic-card p-8 rounded-xl transition-all duration-300 group">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-brand-accent/5 text-brand-accent mb-6 group-hover:scale-105 transition-transform border border-brand-accent/10">
+                        <i class="fas fa-desktop text-base"></i>
+                    </div>
+                    <h3 class="title-serif text-lg text-brand-darkCharcoal mb-3 font-bold">原生 Windows 高能兼容</h3>
+                    <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                        自带三阶终端无损降级。缺少 Linux Bash 下自动降级至 cmd.exe 执行。针对中文环境重塑 GBK 全链路编码映射，告别乱码之痛。
+                    </p>
+                </div>
+
+                <!-- 预设模型 -->
+                <div class="ceramic-card p-8 rounded-xl transition-all duration-300 group">
+                    <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-emerald-500/5 text-emerald-600 mb-6 group-hover:scale-105 transition-transform border border-emerald-500/10">
+                        <i class="fas fa-network-wired text-base"></i>
+                    </div>
+                    <h3 class="title-serif text-lg text-brand-darkCharcoal mb-3 font-bold">天枢星罗 免Key自带额度</h3>
+                    <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                        跳过任何繁杂的模型秘钥向导。我们自带安全分流，默认接入深度优化版大模型（含 Kimi 超长文本与 DeepSeek V4 Pro 深度推理），直接可用。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 绝艺展示 (Features) - Bento 风格排版提升商业设计感 -->
+    <section id="features" class="py-24 max-w-7xl mx-auto px-6">
+        <div class="text-center max-w-2xl mx-auto mb-20 space-y-4">
+            <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 核心绝艺 /</span>
+            <h2 class="title-serif text-3xl md:text-4xl text-brand-darkCharcoal font-black">行止有据，运筹帷幄</h2>
+        </div>
+
+        <!-- Bento 栅格布局 -->
+        <div class="grid grid-cols-12 gap-8 items-stretch">
+            
+            <!-- Bento Card 1: 技能自行沉淀系统 (大比例 7cols) -->
+            <div class="col-span-12 lg:col-span-7 ceramic-card rounded-2xl p-8 flex flex-col justify-between group transition-all duration-300">
+                <div class="space-y-4">
+                    <div class="text-brand-accent font-mono text-[10px] tracking-widest uppercase">SKILLS ACCUMULATION //</div>
+                    <h3 class="title-serif text-xl sm:text-2xl text-brand-darkCharcoal font-bold">技能自主吐纳，遇敌即写 SKILL.md</h3>
+                    <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                        不甘止步于内置的 30+ 门常用绝艺。当易墨帮助您处理一些特定的开发任务后，它会自动反思动作路径，自动将其总结成一份标准的 `SKILL.md`，沉淀在您的技能柜中，化为恒定技能。
+                    </p>
+                </div>
+                <!-- 仿真技术动画 -->
+                <div class="mt-6 bg-brand-glaze/60 p-4.5 rounded-lg font-mono text-[11px] border border-black/[0.04]">
+                    <div class="flex items-center justify-between mb-2 text-[10px]">
+                        <span class="text-gray-400 font-mono">技能自动沉淀逻辑：</span>
+                        <span class="text-brand-accent font-serif animate-pulse">● 正在反思并凝练成册</span>
+                    </div>
+                    <div class="space-y-1 text-gray-500">
+                        <div>1. 分析并拆解昨晚成功的 `node_scraper` 脚本...</div>
+                        <div>2. 提取出核心参数及异常捕捉钩子 (Hook)...</div>
+                        <div class="text-brand-accent font-semibold">3. 写出: <span class="underline">workspace/skills/node_scraper/SKILL.md</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bento Card 2: 长期记忆温润层 (小比例 5cols) -->
+            <div class="col-span-12 lg:col-span-5 ceramic-card rounded-2xl p-8 flex flex-col justify-between group transition-all duration-300">
+                <div class="space-y-4">
+                    <div class="text-brand-accent font-mono text-[10px] tracking-widest uppercase">LONG-TERM MEMORY //</div>
+                    <h3 class="title-serif text-xl sm:text-2xl text-brand-darkCharcoal font-bold">SQLite 高速索引，长存阁下印记</h3>
+                    <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                        基于本地超轻量级 SQLite 与 FTS5 全文中文索引。系统会在每次会话闭合或自审查时（Memory Nudge），自动过滤日常聊天杂音，提取极富阁下专属办公习惯的条目内化。
+                    </p>
+                </div>
+                <!-- 仿真记忆状态显示 -->
+                <div class="mt-6 bg-[#BD2E24]/5 border border-[#BD2E24]/10 p-4 rounded-lg text-xs">
+                    <span class="text-brand-cinnabar font-mono text-[10px] block mb-1">⚡ MEMORY_NUDGE.MD 自动写入</span>
+                    <span class="text-brand-darkCharcoal font-serif text-[11px]">“阁下习惯优先生成极致精简的 Bash 脚本，而非多余解释。”</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 【重点开发】云端书斋：互动文件中心 (Cloud File Center) -->
+    <section id="cloud-bookcase" class="py-24 bg-brand-glaze/60 border-t border-b border-black/[0.03] relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4">
+                <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 云端书斋 /</span>
+                <h2 class="title-serif text-3xl md:text-4xl text-brand-darkCharcoal font-black">尊享分流安装包与配置文件</h2>
+                <p class="text-gray-500 font-serif text-sm">
+                    点击下方任一卷宗，即可实时从云端镜像源拉取。我们已将所有平台的闭包、必读说明书及出厂配置文件收录于此，一触即达。
+                </p>
+            </div>
+
+            <!-- 书斋高保真文件浏览器 -->
+            <div class="max-w-5xl mx-auto bg-white border border-black/[0.06] rounded-2xl shadow-soft-warm overflow-hidden">
+                <!-- 顶部页眉：深度致敬您提供的古风“云端书斋”截图 -->
+                <div class="bg-[#FCFCFD] border-b border-black/[0.04] p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-brand-cinnabar text-white font-serif font-bold text-xs px-2.5 py-1.5 rounded-sm">
+                            归档
+                        </div>
+                        <div>
+                            <h3 class="font-serif text-lg sm:text-xl font-bold tracking-wide text-brand-darkCharcoal">云端书斋</h3>
+                            <div class="text-xs text-gray-400 font-serif mt-1 flex items-center space-x-2">
+                                <span>当前局所 (根目录)：</span>
+                                <span class="bg-[#EEF1F6] px-2 py-0.5 rounded text-brand-darkCharcoal font-mono font-bold text-[10px]">/EasyHermes</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 交互：搜索框 -->
+                    <div class="relative max-w-xs">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-xs">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" id="file-search-input" oninput="filterFiles()" placeholder="在书斋中搜索卷宗..." class="bg-brand-glaze border border-black/[0.04] rounded-md pl-9 pr-4 py-2 text-xs w-full outline-none focus:border-brand-accent transition-colors text-brand-darkCharcoal">
+                    </div>
+                </div>
+
+                <!-- 云端列表内容 -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-black/[0.03] bg-[#FAFAFD] text-[10px] sm:text-xs font-mono text-gray-400 uppercase tracking-wider">
+                                <th class="py-4 px-6 font-semibold">卷宗名称</th>
+                                <th class="py-4 px-4 font-semibold hidden md:table-cell">文件属性</th>
+                                <th class="py-4 px-4 font-semibold text-right">大小</th>
+                                <th class="py-4 px-4 font-semibold hidden sm:table-cell text-right">归宗日期</th>
+                                <th class="py-4 px-6 text-center">下载操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="file-table-body" class="divide-y divide-black/[0.02] text-xs sm:text-sm">
+                            <!-- JS 动态注入高保真文件条目 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 底部服务器在线状态状态 -->
+                <div class="bg-[#FAFAFD] border-t border-black/[0.04] px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-gray-500 font-serif">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span class="text-emerald-700 font-bold">书斋物理下载网关已联通 (Online)</span>
+                    </div>
+                    <div class="flex items-center space-x-1 font-mono text-[10px]">
+                        <span>MIRROR HOST:</span>
+                        <a href="http://8.130.64.144:8888/EasyHermes" target="_blank" class="text-brand-accent underline hover:text-brand-accentHover font-bold">http://8.130.64.144:8888/EasyHermes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 墨境沙盒：Cursor 级别高保真 IDE 沙盒体验区 -->
+    <section id="sandbox" class="py-24 bg-white border-t border-b border-black/[0.03] relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- 沙盒说明 -->
+                <div class="lg:col-span-4 space-y-6">
+                    <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 墨境沙盒 /</span>
+                    <h2 class="title-serif text-3xl text-brand-darkCharcoal font-bold">探察 Workspace 协作乾坤</h2>
+                    <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                        EasyHermes 在与大模型展开逻辑编排时，会按照优先级检索并组装您的环境提示词（System Prompt）。
+                    </p>
+                    <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                        点击右侧的文件导航，感受真实的 Markdown 提示词在被合成至系统瞬间的科技逻辑魅力。
+                    </p>
+                    
+                    <div class="p-4 bg-brand-glaze/60 border border-brand-accent/20 rounded-lg">
+                        <h4 class="text-xs text-brand-accent font-serif mb-1.5 flex items-center gap-2"><i class="fas fa-magic"></i> 核心小诀窍：</h4>
+                        <p class="text-[11px] text-gray-500 font-serif leading-relaxed">
+                            `AGENTS.md` 针对本地当前工程提供约束规则。如果您希望进行按项目级的隔离行为控制，可以在工程目录内自由放置此文件。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- 沙盒高保真 Cursor IDE 控制台 -->
+                <div class="lg:col-span-8 ceramic-card rounded-2xl p-5 shadow-soft-warm relative">
+                    <div class="absolute top-3.5 right-4 flex space-x-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-brand-accent/40 inline-block"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-brand-accent/20 inline-block"></span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        
+                        <!-- 左：工程目录树选择 -->
+                        <div class="md:col-span-4 border-r border-black/[0.04] pr-4 space-y-1.5">
+                            <div class="text-[9px] text-gray-400 font-mono tracking-widest uppercase mb-4">工程目录树</div>
+                            
+                            <!-- SOUL.md -->
+                            <button onclick="switchFile('soul')" id="btn-soul" class="w-full text-left px-3 py-2.5 rounded font-mono text-[11px] flex items-center justify-between transition-all bg-brand-cinnabar/5 text-brand-cinnabar border-l-2 border-brand-cinnabar">
+                                <span>📄 SOUL.md</span>
+                                <span class="text-[9px] bg-brand-cinnabar/10 px-1.5 py-0.5 rounded font-mono font-bold">SOUL #1</span>
+                            </button>
+                            
+                            <!-- AGENTS.md -->
+                            <button onclick="switchFile('agents')" id="btn-agents" class="w-full text-left px-3 py-2.5 rounded font-mono text-[11px] flex items-center justify-between transition-all text-gray-500 hover:bg-black/[0.01]">
+                                <span>📄 AGENTS.md</span>
+                                <span class="text-[9px] bg-brand-accent/10 text-brand-accent px-1.5 py-0.5 rounded font-mono font-bold">RULE #2</span>
+                            </button>
+
+                            <!-- MEMORY.md -->
+                            <button onclick="switchFile('memory')" id="btn-memory" class="w-full text-left px-3 py-2.5 rounded font-mono text-[11px] flex items-center justify-between transition-all text-gray-500 hover:bg-black/[0.01]">
+                                <span>📄 MEMORY.md</span>
+                                <span class="text-[9px] bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded font-mono font-bold">MEM #3</span>
+                            </button>
+
+                            <!-- SKILL.md -->
+                            <button onclick="switchFile('skill')" id="btn-skill" class="w-full text-left px-3 py-2.5 rounded font-mono text-[11px] flex items-center justify-between transition-all text-gray-500 hover:bg-black/[0.01]">
+                                <span>📄 SKILL.md</span>
+                                <span class="text-[9px] bg-sky-500/10 text-sky-600 px-1.5 py-0.5 rounded font-mono font-bold">SKILL #4</span>
+                            </button>
+                        </div>
+                        
+                        <!-- 右：高保真编辑器细节 -->
+                        <div class="md:col-span-8 flex flex-col justify-between h-[360px]">
+                            <div class="border-b border-black/[0.04] pb-3">
+                                <span class="text-xs text-brand-accent font-mono font-bold" id="file-path">workspace/SOUL.md</span>
+                                <p class="text-[11px] text-gray-400 font-serif mt-1" id="file-desc">每次新建会话时自动读取，作为主导系统提示词的首要槽位，确定身份基调。</p>
+                            </div>
+                            
+                            <!-- 代码预览 -->
+                            <div class="flex-grow my-3 overflow-y-auto bg-brand-glaze/50 p-4 rounded-lg text-[11px] font-mono text-brand-darkCharcoal border border-black/[0.03]">
+                                <pre class="whitespace-pre-wrap leading-relaxed" id="file-content"><span class="syntax-key"># SOUL.md</span>
+
+我的名字是 易墨 (EasyHermes)。
+我是老大的专属 AI 助手。
+
+1. 我运行于中文 Windows 原生操作系统环境；
+2. 遇到 Bash 脚本时，优先降级并采用 Windows <span class="syntax-str">cmd.exe</span> 指令执行；
+3. 遇到写文件、读文件指令时，优先调用纯 Python 库实现，绝不反复试探 POSIX 工具。</pre>
+                            </div>
+
+                            <!-- 状态参数 -->
+                            <div class="bg-brand-glaze p-2.5 rounded border border-black/[0.04] text-[10px] text-gray-500 font-serif flex items-center justify-between">
+                                <span class="flex items-center gap-2 text-gray-400">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    合成映射槽位: <b id="file-inject" class="font-normal text-brand-accent font-mono font-bold">系统提示词身份槽位 #1</b>
+                                </span>
+                                <span class="font-mono text-[9px] text-gray-500 font-mono font-semibold" id="file-size">SIZE LIMIT: 20k CHARACTERS</span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- 灵兽偶联：极致高保真 ESP32-S3 电路板交互体验中心 -->
+    <section id="hardware" class="py-24 max-w-7xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            
+            <!-- 硬件交互操作演示 -->
+            <div class="lg:col-span-7 ceramic-card rounded-2xl p-6 shadow-soft-warm relative order-last lg:order-first">
+                <div class="absolute -top-12 -right-12 w-48 h-48 bg-brand-cinnabar/5 blur-3xl pointer-events-none"></div>
+                
+                <div class="flex items-center justify-between border-b border-black/[0.04] pb-3.5 mb-5">
+                    <div class="flex items-center space-x-2.5">
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-xs font-mono text-gray-500">ESP32-S3 IoT 物理主板实时模拟调试区</span>
+                    </div>
+                    <span class="text-[9px] bg-[#EEF1F6] px-2.5 py-0.5 rounded text-brand-darkCharcoal font-mono font-bold" id="hw-ip">IP: 192.168.31.108</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    <!-- 左侧：3D/SVG 电路板渲染（高质感，电路走线可点亮） -->
+                    <div class="md:col-span-5 flex justify-center">
+                        <div class="relative w-40 h-40 bg-[#E9ECF2] rounded-xl border border-white shadow-lg p-3 flex flex-col justify-between">
+                            <!-- 芯片与走线 SVG -->
+                            <div class="absolute inset-0 p-2 pointer-events-none opacity-50">
+                                <svg class="w-full h-full" viewBox="0 0 100 100" fill="none">
+                                    <!-- 金色走线 -->
+                                    <path id="line-trace-1" d="M10 20 L40 20 L40 50 L80 50" stroke="#C59B27" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="100" class="transition-all duration-1000"/>
+                                    <path id="line-trace-2" d="M10 80 L50 80 L50 50" stroke="#BD2E24" stroke-width="1.2" stroke-dasharray="100" stroke-dashoffset="100" class="transition-all duration-1000"/>
+                                </svg>
+                            </div>
+
+                            <!-- 主控芯片核心 -->
+                            <div class="self-center mt-3 w-16 h-16 bg-white border border-black/[0.08] rounded shadow flex items-center justify-center font-mono text-[9px] text-brand-darkCharcoal relative font-bold">
+                                <div class="absolute -inset-1 border border-brand-accent/20 rounded animate-pulse"></div>
+                                ESP32-S3
+                            </div>
+                            
+                            <!-- 两个指示灯 -->
+                            <div class="flex justify-between items-center px-1">
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" id="led-pow"></span>
+                                    <span class="text-[7px] font-mono text-gray-500">POW</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block transition-all duration-300" id="led-act"></span>
+                                    <span class="text-[7px] font-mono text-gray-500">ACT</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：三个交互按钮 -->
+                    <div class="md:col-span-7 space-y-4">
+                        <p class="text-xs font-serif text-gray-400">点击下方指令向云端仿真灵宠投递信号：</p>
+                        
+                        <div class="space-y-2.5">
+                            <button onclick="simulateHw('greeting')" class="w-full px-4 py-3 bg-white hover:bg-brand-glaze border border-black/[0.04] hover:border-brand-cinnabar text-left rounded-lg transition-all group shadow-sm">
+                                <span class="block text-brand-cinnabar font-serif font-bold text-xs mb-0.5 group-hover:text-brand-cinnabar/80">① 灵宠打招呼</span>
+                                <span class="text-[10px] text-gray-500 block">指令流：投递 PWM 信号驱动前爪机械舵机</span>
+                            </button>
+                            
+                            <button onclick="simulateHw('temp')" class="w-full px-4 py-3 bg-white hover:bg-brand-glaze border border-black/[0.04] hover:border-brand-accent text-left rounded-lg transition-all group shadow-sm">
+                                <span class="block text-brand-accent font-serif font-bold text-xs mb-0.5 group-hover:text-brand-accent/80">② DHT22 温湿数据采集</span>
+                                <span class="text-[10px] text-gray-500 block">传感器：读取物理环境温湿度数值</span>
+                            </button>
+
+                            <button onclick="simulateHw('comfort')" class="w-full px-4 py-3 bg-white hover:bg-brand-glaze border border-black/[0.04] hover:border-emerald-600 text-left rounded-lg transition-all group shadow-sm">
+                                <span class="block text-emerald-600 font-serif font-bold text-xs mb-0.5 group-hover:text-emerald-500">③ PWM 暖橘色呼吸灯</span>
+                                <span class="text-[10px] text-gray-500 block">氛围：控制灵宠核心呼吸灯色彩矩阵</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 仿真 SSE 控制流日志 -->
+                <div class="bg-brand-glaze rounded-lg p-4 h-48 font-mono text-[11px] overflow-y-auto border border-black/[0.04] space-y-1.5 mt-5">
+                    <div class="text-[9px] text-gray-400 tracking-wider font-mono font-semibold">// SSE LIVE BROADCAST LOGS (/hw/stream)</div>
+                    <div class="text-gray-600 space-y-1" id="hw-logs">
+                        <div class="text-gray-400">[STANDBY] 当前设备网关处于静息状态，随时接收测试脉冲指令...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 硬件概念解说 -->
+            <div class="lg:col-span-5 space-y-6">
+                <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 灵兽偶联 /</span>
+                <h2 class="title-serif text-3xl text-brand-darkCharcoal font-black">毛绒玩偶，一朝附灵</h2>
+                <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                    EasyHermes 不仅仅存活在冷冰冰的本地硬盘之中。它是业界首个**支持 ESP32-S3 原生 HTTP 局域网桥接协议**的桌面级 Agent 客户端。
+                </p>
+                <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
+                    哪怕是不懂嵌入式编程的普通用户，只需在毛绒宠物里装入最基础的舵机骨骼与主控开发板。EasyHermes 就能用自然语言下发执行，让玩偶点头、招手、说话。
+                </p>
+                <div class="grid grid-cols-2 gap-4 py-4 border-t border-black/[0.04]">
+                    <div>
+                        <span class="block text-lg font-bold text-brand-accent">95%</span>
+                        <span class="block text-[10px] text-gray-400 font-serif">局域网命令下行延迟 &lt; 50ms</span>
+                    </div>
+                    <div>
+                        <span class="block text-lg font-bold text-brand-darkCharcoal">REST API</span>
+                        <span class="block text-[10px] text-gray-400 font-serif">完备的 WebSocket/HTTP 网关</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- 答疑篇 (FAQ) -->
+    <section id="faq" class="py-24 bg-gradient-to-b from-white to-brand-glaze/30 border-t border-b border-black/[0.03]">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-20 space-y-4">
+                <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 问教篇 /</span>
+                <h2 class="title-serif text-3xl md:text-4xl text-brand-darkCharcoal font-black">常谈不厌，解惑答疑</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-serif">
+                <!-- Q1 -->
+                <div class="ceramic-card p-6 rounded-lg space-y-3 hover:border-brand-accent/20 transition-colors duration-300">
+                    <h3 class="text-sm sm:text-base text-brand-accent font-bold font-serif">Q: 双击启动无反应，或提示微软 Defender 危险警示？</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        A: 本软件由于将完备的 Python 微型内核完全打包，且具备本地文件修改和终端交互操作。在由于数字证书未经过微软高额商业认证时，部分 Windows Defender 会弹出未知警告，请点击“仍要运行”并放行。
+                    </p>
+                </div>
+                
+                <!-- Q2 -->
+                <div class="ceramic-card p-6 rounded-lg space-y-3 hover:border-brand-accent/20 transition-colors duration-300">
+                    <h3 class="text-sm sm:text-base text-brand-accent font-bold font-serif">Q: 未成功弹出网页 Dashboard 终端，如何处理？</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        A: 少数安全性控制苛刻的 Windows 系统会阻断双击跳转默认浏览器的行为。当您确认终端正在运行（未报错关闭）后，直接在现代浏览器中手动访问地址 <code class="font-mono text-[10px] text-brand-darkCharcoal bg-black/5 px-1.5 py-0.5 rounded">http://localhost:7777</code> 即可跨进控制大殿。
+                    </p>
+                </div>
+
+                <!-- Q3 -->
+                <div class="ceramic-card p-6 rounded-lg space-y-3 hover:border-brand-accent/20 transition-colors duration-300">
+                    <h3 class="text-sm sm:text-base text-brand-accent font-bold font-serif">Q: 设备更换，我的聊天记录和记忆是否随之销毁？</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        A: 绝不。得得益于便携锁定文件的安全机制。您所有的聊天记录（`state.db`）、模型额度、记忆沉淀（`MEMORY.md`）全部随盘存放于同级的 `workspace/` 目录下。只需将此工程整体迁移，即在任何电脑上完美复活。
+                    </p>
+                </div>
+
+                <!-- Q4 -->
+                <div class="ceramic-card p-6 rounded-lg space-y-3 hover:border-brand-accent/20 transition-colors duration-300">
+                    <h3 class="text-sm sm:text-base text-brand-accent font-bold font-serif">Q: 局域网物理设备无法联动，如何调试？</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        A: 确保您的计算机与 ESP32 设备连接在同一个 Wi-Fi 网络内。您可以通过在局域网内广播配置 `WEB_HOST=0.0.0.0` 环境变量，允许外部物理外设跨节点对计算机进行 HTTP 数据探针上行。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部及页尾 -->
+    <footer class="bg-white border-t border-black/[0.03] py-16 px-8 text-center font-serif text-xs text-gray-400 relative z-10 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto space-y-6">
+            <div class="flex items-center justify-center space-x-2.5">
+                <div class="seal-stamp text-white font-serif font-black w-7 h-7 flex items-center justify-center rounded text-xs">易</div>
+                <span class="text-brand-darkCharcoal font-bold tracking-widest text-xs font-serif">EasyHermes 易墨</span>
+            </div>
+            
+            <p class="max-w-md mx-auto leading-relaxed text-[11px] text-gray-500 font-serif">
+                融合中式水墨风韵与极致桌面工程自动化，为您呈现绝无任何多余依赖的 AI 随行桌面灵宠。
+            </p>
+            
+            <div class="flex items-center justify-center space-x-6 text-brand-darkCharcoal font-sans text-[11px] font-medium">
+                <a href="https://github.com/anthonyhermes/easyhermes" target="_blank" class="hover:text-brand-accent transition-colors"><i class="fab fa-github mr-1.5"></i> GitHub 官方仓库</a>
+                <span class="text-black/10">|</span>
+                <span>核心内核协议：Nous Research (MIT 许可)</span>
+                <span class="text-black/10">|</span>
+                <span>更新时刻：2026-05-26</span>
+            </div>
+
+            <div class="text-[10px] text-gray-400 font-mono">
+                &copy; 2026 EasyHermes Inc. Crafting high-quality localized AI intelligence.
+            </div>
+        </div>
+    </footer>
+
+    <!-- 真实数据驱动：文件书斋系统脚本 -->
+    <script>
+        // 云端书斋镜像源基准地址
+        const MIRROR_BASE = "http://8.130.64.144:8888/EasyHermes";
+
+        // 镜像源下的核心文件名录定义 - 完美收载所有的 Windows 和 Mac .zip 安装包及配置卷宗
+        const cloudFiles = [
+            {
+                name: "EasyHermes_Windows_x64_Portable.zip",
+                type: "Windows 便携免安装完整包 (包含嵌入式 Python 环境，一键解压即用)",
+                size: "52.4 MB",
+                date: "2026-05-26",
+                icon: "fa-file-zipper text-brand-cinnabar"
+            },
+            {
+                name: "EasyHermes_macOS_Silicon.tar.gz",
+                type: "macOS M系列苹果芯片原生运行归档文件",
+                size: "48.1 MB",
+                date: "2026-05-26",
+                icon: "fa-file-archive text-brand-accent"
+            },
+            {
+                name: "EasyHermes_macOS_Intel.tar.gz",
+                type: "macOS Intel系列芯片原生兼容归档文件",
+                size: "49.6 MB",
+                date: "2026-05-26",
+                icon: "fa-file-archive text-gray-400"
+            },
+            {
+                name: "easyhermes 必读.md",
+                type: "EasyHermes 核心 Workspace 初始化与运行读取规则必读手册",
+                size: "4.8 KB",
+                date: "2026-05-24",
+                icon: "fa-file-markdown text-blue-500"
+            },
+            {
+                name: "SOUL.md",
+                type: "易墨 AI 核心灵魂身份设定范例模本文件",
+                size: "2.1 KB",
+                date: "2026-05-24",
+                icon: "fa-file-code text-teal-600"
+            },
+            {
+                name: "AGENTS.md",
+                type: "特定工程项目规范约束与平级匹配提示词文件",
+                size: "1.2 KB",
+                date: "2026-05-24",
+                icon: "fa-file-code text-orange-500"
+            },
+            {
+                name: "config.yaml",
+                type: "Agent 行为及预设模型、记忆开关配置文件模版",
+                size: "852 B",
+                date: "2026-05-24",
+                icon: "fa-file-lines text-purple-500"
+            }
+        ];
+
+        // 渲染书斋文件列表
+        function renderFiles(list) {
+            const tbody = document.getElementById("file-table-body");
+            tbody.innerHTML = "";
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-12 text-center text-gray-400 font-serif">
+                            <i class="fas fa-folder-open text-3xl block mb-3 text-gray-300"></i>
+                            书斋幽深，未觅得相关卷宗墨迹
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            list.forEach(file => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-brand-glaze/30 transition-colors group";
+                
+                // 拼接绝对下载链接
+                const absoluteDownloadUrl = `${MIRROR_BASE}/${file.name}`;
+
+                tr.innerHTML = `
+                    <td class="py-4.5 px-6 font-mono font-semibold text-brand-darkCharcoal flex items-center space-x-3">
+                        <i class="fa-lg fas ${file.icon} group-hover:scale-110 transition-transform"></i>
+                        <span class="hover:text-brand-accent transition-colors truncate max-w-xs sm:max-w-sm" title="${file.name}">${file.name}</span>
+                    </td>
+                    <td class="py-4.5 px-4 text-xs text-gray-400 font-serif hidden md:table-cell">
+                        ${file.type}
+                    </td>
+                    <td class="py-4.5 px-4 text-xs font-mono text-gray-500 text-right">
+                        ${file.size}
+                    </td>
+                    <td class="py-4.5 px-4 text-xs font-mono text-gray-400 text-right hidden sm:table-cell">
+                        ${file.date}
+                    </td>
+                    <td class="py-4.5 px-6 text-center">
+                        <button onclick="downloadFile('${file.name}', '${absoluteDownloadUrl}')" class="bg-white hover:bg-brand-cinnabar hover:text-white border border-black/[0.06] hover:border-brand-cinnabar text-brand-darkCharcoal text-xs font-serif px-3 py-1.5 rounded transition-all duration-200 shadow-sm inline-flex items-center space-x-1 font-bold">
+                            <i class="fas fa-download text-[10px]"></i>
+                            <span>极速下载</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 真实下载动作触发器
+        function downloadFile(fileName, url) {
+            const logs = document.getElementById("hw-logs");
+            const newLog = document.createElement("div");
+            newLog.className = "text-brand-accent transition-all duration-300 py-0.5";
+            newLog.innerHTML = `<span class="opacity-60 text-[9px] font-mono mr-1">[CLOUD]</span> 正在建立连接拉取：${fileName} ...`;
+            logs.appendChild(newLog);
+            logs.scrollTop = logs.scrollHeight;
+
+            // 创建隐藏的 a 标签触发文件流拉取
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // 更新状态
+            setTimeout(() => {
+                newLog.className = "text-emerald-600 transition-all duration-300 py-0.5 font-semibold";
+                newLog.innerHTML = `<span class="opacity-60 text-[9px] font-mono mr-1">[CLOUD]</span> 卷宗【${fileName}】已下发成功，请在您的本地下载路径中查收。`;
+                logs.scrollTop = logs.scrollHeight;
+            }, 850);
+        }
+
+        // 检索过滤器
+        function filterFiles() {
+            const query = document.getElementById("file-search-input").value.trim().toLowerCase();
+            const filtered = cloudFiles.filter(f => 
+                f.name.toLowerCase().includes(query) || 
+                f.type.toLowerCase().includes(query)
+            );
+            renderFiles(filtered);
+        }
+
+        // 页面启动时默认装填文件
+        window.onload = function() {
+            renderFiles(cloudFiles);
+        };
+    </script>
+
+    <!-- 沙盒脚本交互 -->
+    <script>
+        const fileData = {
+            soul: {
+                path: 'workspace/SOUL.md',
+                desc: '每次新建会话时自动读取，作为主导系统提示词的首要槽位，确定身份基调。',
+                content: `<span class="syntax-key"># SOUL.md</span>\n\n我的名字是 易墨 (EasyHermes)。\n我是老大的专属 AI 助手。\n\n1. 我运行于中文 Windows 原生操作系统环境；\n2. 遇到 Bash 脚本时，优先降级并采用 Windows <span class="syntax-str">cmd.exe</span> 指令执行；\n3. 遇到写文件、读文件指令时，优先调用纯 Python 库实现，绝不反复试探 POSIX 工具。`,
+                inject: '系统提示词身份槽位 #1',
+                size: '约 2,300 字符 (最大 20,000)'
+            },
+            agents: {
+                path: 'dist/AGENTS.md',
+                desc: '项目级开发规则定义文档，放置于程序同级目录，满足优先级 2 特征。',
+                content: `<span class="syntax-key"># AGENTS.md (特定工程规则)</span>\n\n针对当前开发目录规约如下：\n- 所有的前端组件代码必须收录于单文件 HTML 中，绝不外置；\n- 后端接口基于 Node.js，通过 Vercel 无服务器路径分发运行；\n- 运行逻辑必须支持优雅的 cmd.exe 降级兼容，不允许报错阻塞。`,
+                inject: '系统提示词核心项目槽位 #2',
+                size: '约 1,100 字符 (先匹配先生效)'
+            },
+            memory: {
+                path: 'workspace/memories/MEMORY.md',
+                desc: '长期会话记忆。在每轮交互结束后，由 Honcho 与自审查机制提取，并在下次对话前唤醒。',
+                content: `<span class="syntax-key"># MEMORY.md</span>\n\n<span class="syntax-comment">[USER PROFILE]</span>\n- 开发者偏好：喜欢精简干净的中国风水墨 UI 艺术；\n- 执行痛点：对由于 Python 路径配置导致的乱码深感头疼；\n- 习惯动作：频繁通过 ESP32 硬件进行灵宠指令联调调试。`,
+                inject: '系统提示词 volatile 内存槽位',
+                size: '最高上限 2,200 字符'
+            },
+            skill: {
+                path: 'workspace/skills/custom-skill/SKILL.md',
+                desc: '自学习技能系统定义文档，大模型提炼沉淀的自主可复用工具。',
+                content: `<span class="syntax-key"># SKILL.md (定制进化技能)</span>\n\n名称: 百度一键搜索并摘取归档\n描述: 遇到搜索场景，自动启动百度引擎并按文章节点筛选优质内容，转换为本地 Markdown 归档。\n\n执行步骤:\n1. 获取百度搜索 API URL 载入\n2. 提取最顶层 3 个中文解析结构\n3. 通过 Python Beautiful Soup 提炼段落`,
+                inject: '启动时及 `/reload-skills` 命令呼叫加载',
+                size: '扫描子目录 SKILL.md 注入'
+            }
+        };
+
+        function switchFile(key) {
+            const data = fileData[key];
+            if (!data) return;
+
+            // 更新状态
+            document.getElementById('file-path').innerText = data.path;
+            document.getElementById('file-desc').innerText = data.desc;
+            document.getElementById('file-content').innerHTML = data.content;
+            document.getElementById('file-inject').innerText = `合成映射槽位: ${data.inject}`;
+            document.getElementById('file-size').innerText = data.size;
+
+            // 切换按钮高亮样式
+            ['soul', 'agents', 'memory', 'skill'].forEach(item => {
+                const btn = document.getElementById(`btn-${item}`);
+                if (item === key) {
+                    btn.className = `w-full text-left px-3 py-2.5 rounded font-mono text-[11px] flex items-center justify-between transition-all bg-brand-cinnabar/10 text-brand-cinnabar border-l-2 border-brand-cinnabar`;
+                } else {
+                    btn.className = `w-full text-left px-3 py-2.5 rounded font-mono text-[11px] flex items-center justify-between transition-all text-gray-500 hover:bg-black/[0.02]`;
+                }
+            });
+        }
+
+        // 硬件测试终端平滑仿真 SSE 推送
+        function simulateHw(type) {
+            const logBox = document.getElementById('hw-logs');
+            const trace1 = document.getElementById('line-trace-1');
+            const trace2 = document.getElementById('line-trace-2');
+            const ledAct = document.getElementById('led-act');
+            
+            // 重置硬件 LED
+            ledAct.className = "w-1.5 h-1.5 rounded-full bg-gray-400 inline-block transition-all duration-300";
+            logBox.innerHTML = '';
+
+            // 触发走线流光动画
+            trace1.setAttribute('stroke-dashoffset', '0');
+            trace2.setAttribute('stroke-dashoffset', '0');
+
+            setTimeout(() => {
+                ledAct.className = "w-1.5 h-1.5 rounded-full bg-brand-cinnabar inline-block shadow-[0_0_10px_#BD2E24] transition-all duration-300";
+            }, 600);
+
+            let steps = [];
+            if (type === 'greeting') {
+                steps = [
+                    { t: '[SYSTEM]', m: '正在读取行动协议指令：{ ACTION: "GREETING_WAVE", PWM_DUTY: 90 }', c: 'text-gray-400' },
+                    { t: '[GATEWAY]', m: '已捕获上行网络请求：POST -> /api/hw/command', c: 'text-brand-accent font-semibold' },
+                    { t: '[ESP32-S3]', m: 'WiFi 通信畅通。已接收到舵机摆动命令波形...', c: 'text-gray-500' },
+                    { t: '[PHYSICAL]', m: '舵机驱动成功！灵兽前爪举起摆动两下，LED 点阵笑脸渲染完毕 🌟', c: 'text-emerald-600 font-bold' },
+                    { t: '[SSE_STREAM]', m: '状态更新推送：task_id (wave_912) 执行状态更新为 COMPLETED。', c: 'text-emerald-500 font-semibold' }
+                ];
+            } else if (type === 'temp') {
+                steps = [
+                    { t: '[SYSTEM]', m: '正在构建环境探针探测帧：{ SENSOR_TYPE: "DHT22" }', c: 'text-gray-400' },
+                    { t: '[GATEWAY]', m: '发出探测端点呼叫：POST -> /api/hw/command', c: 'text-brand-accent font-semibold' },
+                    { t: '[ESP32-S3]', m: 'DHT22 采集模块被激活，采集电平频率回传数据...', c: 'text-gray-500' },
+                    { t: '[PHYSICAL]', m: '采集成功：当前局域网室内环境：温度 24.5°C | 湿度 48% RH', c: 'text-emerald-600 font-bold' },
+                    { t: '[SSE_STREAM]', m: '数据实时解析完毕，已向 Dashboard 历史会话追加气象数据。', c: 'text-emerald-500 font-semibold' }
+                ];
+            } else if (type === 'comfort') {
+                steps = [
+                    { t: '[SYSTEM]', m: '正在调用 PWM 声光渲染策略：{ COLOR: "#FF8C00", BEAT_RESP: true }', c: 'text-gray-400' },
+                    { t: '[GATEWAY]', m: '呼叫氛围 PWM 控制端点：POST -> /api/hw/command', c: 'text-brand-accent font-semibold' },
+                    { t: '[ESP32-S3]', m: 'PCM5102A 解码开始。正在渲染极高质感橘黄呼吸灯律动波段...', c: 'text-gray-500' },
+                    { t: '[PHYSICAL]', m: '灵兽核心呼吸灯开始温润闪烁，物理扬声器联动舒缓波形。', c: 'text-emerald-600 font-bold' },
+                    { t: '[SSE_STREAM]', m: '情感渲染策略就绪。', c: 'text-emerald-500 font-semibold' }
+                ];
+            }
+
+            // 逐延迟输出，仿真真实的 SSE 推流效果
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    const row = document.createElement('div');
+                    row.className = `${step.c} transition-all duration-300 translate-y-2 opacity-0`;
+                    row.innerHTML = `<span class="opacity-60 text-[9px] font-mono mr-1">${step.t}</span> ${step.m}`;
+                    logBox.appendChild(row);
+                    
+                    // 自动滚动到终端底部
+                    logBox.scrollTop = logBox.scrollHeight;
+                    
+                    setTimeout(() => {
+                        row.classList.remove('translate-y-2', 'opacity-0');
+                    }, 50);
+                }, index * 400);
+            });
+            
+            // 重置走线
+            setTimeout(() => {
+                trace1.setAttribute('stroke-dashoffset', '100');
+                trace2.setAttribute('stroke-dashoffset', '100');
+            }, steps.length * 400 + 1000);
+        }
+    </script>
+</body>
+</html>
