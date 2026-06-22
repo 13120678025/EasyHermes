@@ -7,6 +7,8 @@
 
 const express = require('express');
 const path = require('path');
+const https = require('https');
+const http = require('http');
 const app = express();
 
 app.use(express.json());
@@ -14,6 +16,41 @@ app.use(express.json());
 // 1. 允许将 server.js 所在的同级根目录作为静态资源服务目录
 // 这保证了同级目录下的图片、配置文件、必读说明能够通过 HTTP 直接被读取或下载
 app.use(express.static(__dirname));
+
+// ---- 云端镜像代理（解决 HTTPS 页面无法请求 HTTP 镜像的混合内容问题） ----
+const MIRROR_HOST = 'http://8.130.64.144:8888';
+
+// 代理：获取镜像目录 HTML
+app.get('/api/mirror-list', (req, res) => {
+    const url = `${MIRROR_HOST}/EasyHermes`;
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (upstream) => {
+        let data = '';
+        upstream.on('data', chunk => data += chunk);
+        upstream.on('end', () => {
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.send(data);
+        });
+    }).on('error', (err) => {
+        res.status(502).json({ error: 'Mirror unreachable', detail: err.message });
+    });
+});
+
+// 代理：下载镜像文件（流式转发，不占内存）
+app.get('/api/mirror-download/:filename', (req, res) => {
+    const filename = decodeURIComponent(req.params.filename);
+    const url = `${MIRROR_HOST}/EasyHermes/${encodeURIComponent(filename)}`;
+    const client = url.startsWith('https') ? https : http;
+    client.get(url, (upstream) => {
+        // 转发上游 headers
+        if (upstream.headers['content-type']) res.setHeader('Content-Type', upstream.headers['content-type']);
+        if (upstream.headers['content-length']) res.setHeader('Content-Length', upstream.headers['content-length']);
+        res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`);
+        upstream.pipe(res);
+    }).on('error', (err) => {
+        res.status(502).json({ error: 'Download failed', detail: err.message });
+    });
+});
 
 // 2. 显式配置根路径路由 /
 // 直接将同级目录下的 index.html 发送给浏览器
