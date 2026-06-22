@@ -912,8 +912,10 @@
 
     <!-- 真实数据驱动：文件仓库系统脚本 (动态拉取版) -->
     <script>
-        // 产品仓库镜像源基准地址
+        // 产品仓库镜像源基准地址（优先用本域代理，兜底用直连）
         const MIRROR_BASE = "http://8.130.64.144:8888/EasyHermes";
+        const PROXY_LIST = "/api/mirror-list";           // 代理：获取目录
+        const PROXY_DL   = "/api/mirror-download";       // 代理：下载文件
 
         // 运行时动态填充的文件列表
         let cloudFiles = [];
@@ -950,7 +952,13 @@
         // ---------- 从云端 HTML 页面动态解析文件列表 ----------
         async function fetchCloudFiles() {
             try {
-                const resp = await fetch(MIRROR_BASE, { mode: "cors" });
+                // 优先走本域代理（HTTPS 站点兼容），失败再直连
+                let resp;
+                try {
+                    resp = await fetch(PROXY_LIST);
+                } catch (e) {
+                    resp = await fetch(MIRROR_BASE, { mode: "cors" });
+                }
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const html = await resp.text();
 
@@ -998,21 +1006,15 @@
                 if (cloudFiles.length === 0) {
                     const fallbackMain = [
                         { name: "EasyHermesV5_Win_商用版1.0.zip", type: "商用正式版（最新发布，推荐下载）" },
-                        { name: "EasyHermes_Windows_x64_Portable.zip", type: "Windows x64 便携免安装完整包（解压即用）" },
-                        { name: "EasyHermes_macOS.zip", type: "macOS 原生运行归档文件" },
-                        { name: "easyhermes.exe", type: "Windows 单文件可执行程序" },
-                        { name: "workspace.zip", type: "工作空间初始模板" },
-                        { name: "easyhermes 必读.md", type: "项目说明文档" },
-                        { name: "SOUL.md", type: "AI 核心灵魂身份设定范例" },
-                        { name: "AGENTS.md", type: "工程项目规范约束文件" },
-                        { name: "config.yaml", type: "配置文件模版" }
+                        { name: "workspace.zip", type: "工作空间初始模板" }
                     ];
                     const fallbackArchive = [
                         { name: "EasyHermesV3.5_Win_Desktop.zip", type: "Windows 桌面版 V3.5" },
                         { name: "EasyHermesV3.3_Win_Desktop.zip", type: "Windows 桌面版 V3.3" },
                         { name: "EasyHermesV3.2_Win_Desktop.zip", type: "Windows 桌面版 V3.2" },
                         { name: "EasyHermesV3_Win_Desktop.zip", type: "Windows 桌面版 V3" },
-                        { name: "EasyHermesV2_Win_Desktop.zip", type: "Windows 桌面版 V2" }
+                        { name: "EasyHermesV2_Win_Desktop.zip", type: "Windows 桌面版 V2" },
+                        { name: "EasyHermesV2_macOS.zip", type: "macOS 版 V2" }
                     ];
                     cloudFiles = fallbackMain.map(f => ({ ...f, ...classifyFile(f.name) }));
                     archiveFiles = fallbackArchive.map(f => ({ ...f, ...classifyFile(f.name) }));
@@ -1109,9 +1111,9 @@
             });
         }
 
-        // ---------- 下载 ----------
+        // ---------- 下载（优先走代理，兼容 HTTPS 站点） ----------
         function downloadFile(fileName) {
-            const url = `${MIRROR_BASE}/${encodeURIComponent(fileName)}`;
+            const url = `${PROXY_DL}/${encodeURIComponent(fileName)}`;
             const logs = document.getElementById("hw-logs");
             const newLog = document.createElement("div");
             newLog.className = "text-brand-accent transition-all duration-300 py-0.5";
