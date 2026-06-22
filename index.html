@@ -994,7 +994,30 @@
 
             } catch (err) {
                 console.warn("产品仓库动态拉取失败，使用本地缓存列表:", err.message);
-                updateSyncStatus(false, 0);
+                // 兜底：硬编码已知文件列表（动态拉取失败时使用）
+                if (cloudFiles.length === 0) {
+                    const fallbackMain = [
+                        { name: "EasyHermesV5_Win_商用版1.0.zip", type: "商用正式版（最新发布，推荐下载）" },
+                        { name: "EasyHermes_Windows_x64_Portable.zip", type: "Windows x64 便携免安装完整包（解压即用）" },
+                        { name: "EasyHermes_macOS.zip", type: "macOS 原生运行归档文件" },
+                        { name: "easyhermes.exe", type: "Windows 单文件可执行程序" },
+                        { name: "workspace.zip", type: "工作空间初始模板" },
+                        { name: "easyhermes 必读.md", type: "项目说明文档" },
+                        { name: "SOUL.md", type: "AI 核心灵魂身份设定范例" },
+                        { name: "AGENTS.md", type: "工程项目规范约束文件" },
+                        { name: "config.yaml", type: "配置文件模版" }
+                    ];
+                    const fallbackArchive = [
+                        { name: "EasyHermesV3.5_Win_Desktop.zip", type: "Windows 桌面版 V3.5" },
+                        { name: "EasyHermesV3.3_Win_Desktop.zip", type: "Windows 桌面版 V3.3" },
+                        { name: "EasyHermesV3.2_Win_Desktop.zip", type: "Windows 桌面版 V3.2" },
+                        { name: "EasyHermesV3_Win_Desktop.zip", type: "Windows 桌面版 V3" },
+                        { name: "EasyHermesV2_Win_Desktop.zip", type: "Windows 桌面版 V2" }
+                    ];
+                    cloudFiles = fallbackMain.map(f => ({ ...f, ...classifyFile(f.name) }));
+                    archiveFiles = fallbackArchive.map(f => ({ ...f, ...classifyFile(f.name) }));
+                }
+                updateSyncStatus(false, cloudFiles.length);
             }
 
             // 无论成功失败都渲染
@@ -1011,7 +1034,7 @@
                     <span class="text-emerald-700 font-bold">仓库已实时同步，共收录 ${count} 份卷宗</span>`;
             } else {
                 el.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
-                    <span class="text-amber-700 font-bold">仓库同步暂不可用，已加载本地缓存目录</span>`;
+                    <span class="text-amber-700 font-bold">已加载缓存目录（${count} 份卷宗），部分下载链接可能需要手动访问</span>`;
             }
         }
 
