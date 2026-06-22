@@ -117,6 +117,86 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* ===== 科技商业感升级动画 ===== */
+
+        /* Shimmer 光扫效果 */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* 滚动渐入动画 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+
+        /* Hero Mockup 浮动动画 */
+        @keyframes float-gentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .float-mockup {
+            animation: float-gentle 6s ease-in-out infinite;
+        }
+
+        /* 卡片鼠标跟随光晕 */
+        .glow-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .glow-card::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(197, 155, 39, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+        .glow-card:hover::after {
+            opacity: 1;
+        }
+        .glow-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 科技网格 canvas 容器 */
+        #tech-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 渐变边框动画 */
+        @keyframes border-glow {
+            0%, 100% { border-color: rgba(197, 155, 39, 0.15); }
+            50% { border-color: rgba(197, 155, 39, 0.35); }
+        }
+        .border-glow-animate {
+            animation: border-glow 4s ease-in-out infinite;
+        }
+
+        /* 数字递增目标 */
+        .count-up {
+            font-variant-numeric: tabular-nums;
+        }
     </style>
 </head>
 <body class="bg-brand-porcelain text-brand-darkCharcoal font-sans antialiased dot-matrix paper-grain min-h-screen relative overflow-x-hidden select-none">
@@ -127,10 +207,14 @@
     <div class="absolute inset-0 light-glow-3 pointer-events-none z-0"></div>
 
     <!-- 顶部状态通知条 -->
-    <div class="relative z-50 bg-[#BD2E24]/5 border-b border-[#BD2E24]/10 px-4 py-2 text-center text-[10px] sm:text-[11px] tracking-widest font-mono text-brand-cinnabar uppercase">
+    <div class="relative z-50 bg-brand-accent/[0.04] border-b border-brand-accent/10 px-4 py-1.5 text-center text-[10px] sm:text-[11px] tracking-wider font-mono text-brand-accent">
         <span class="inline-flex items-center gap-2">
-            <span class="w-1.5 h-1.5 rounded-full bg-brand-cinnabar animate-pulse"></span>
-            <span>EasyHermes desktop client v1.0 released. natively engineered for secure offline operations.</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse"></span>
+            <span class="font-semibold">EasyHermes v1.0</span>
+            <span class="text-brand-accent/40">·</span>
+            <a href="https://wdl.best" target="_blank" class="hover:underline font-semibold">秒创AI 生态产品</a>
+            <span class="text-brand-accent/40">·</span>
+            <span class="text-gray-500">原生安全离线 AI Agent 桌面客户端</span>
         </span>
     </div>
 
@@ -146,13 +230,16 @@
                     <span class="text-brand-darkCharcoal text-lg font-bold tracking-widest font-serif block leading-tight">EasyHermes</span>
                     <span class="text-[9px] text-brand-accent tracking-widest block font-mono font-semibold">WORKSPACE NATIVE AI AGENT</span>
                 </div>
+                <a href="https://wdl.best" target="_blank" class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 bg-brand-accent/5 border border-brand-accent/20 rounded text-[8px] text-brand-accent font-mono font-bold tracking-wider hover:bg-brand-accent/10 hover:border-brand-accent/40 transition-all">
+                    <i class="fas fa-link text-[7px]"></i> 秒创AI
+                </a>
             </div>
             
             <!-- 菜单 -->
             <nav class="hidden lg:flex items-center space-x-10 text-xs tracking-widest font-serif text-gray-500 font-medium">
                 <a href="#philosophy" class="hover:text-brand-darkCharcoal transition-colors duration-200">极简致美</a>
                 <a href="#features" class="hover:text-brand-darkCharcoal transition-colors duration-200">核心绝艺</a>
-                <a href="#cloud-bookcase" class="hover:text-brand-darkCharcoal transition-colors duration-200">云端书斋</a>
+                <a href="#cloud-bookcase" class="hover:text-brand-darkCharcoal transition-colors duration-200">产品仓库</a>
                 <a href="#sandbox" class="hover:text-brand-darkCharcoal transition-colors duration-200">墨境沙盒</a>
                 <a href="#hardware" class="hover:text-brand-darkCharcoal transition-colors duration-200">物理灵兽</a>
             </nav>
@@ -168,10 +255,11 @@
 
     <!-- 主视觉区 (Hero Section) -->
     <main id="hero" class="relative pt-12 pb-24 lg:pt-20 lg:pb-32 px-6 max-w-7xl mx-auto z-10">
+        <canvas id="tech-canvas"></canvas>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             
             <!-- 左侧内容区 -->
-            <div class="lg:col-span-6 space-y-8">
+            <div class="lg:col-span-6 space-y-8 reveal">
                 <div class="inline-flex items-center space-x-2.5 px-3 py-1 bg-white border border-brand-accent/25 rounded-md text-[11px] text-brand-accent font-mono font-semibold shadow-sm">
                     <span class="inline-block w-1.5 h-1.5 rounded-full bg-brand-accent animate-ping"></span>
                     <span>Nous Research / Hermes Core Windows Native Wrapper</span>
@@ -190,15 +278,15 @@
                 <!-- 尊贵技术参数面板 -->
                 <div class="grid grid-cols-3 gap-6 py-6 border-t border-b border-black/[0.04] max-w-xl font-serif">
                     <div class="space-y-1">
-                        <span class="block text-2xl sm:text-3xl font-light text-brand-accent">0 依赖</span>
+                        <span class="block text-2xl sm:text-3xl font-light text-brand-accent count-up" data-target="0" data-suffix=" 依赖">0 依赖</span>
                         <span class="block text-[10px] text-gray-400">内置 Python 3.11 闭环打包</span>
                     </div>
                     <div class="space-y-1">
-                        <span class="block text-2xl sm:text-3xl font-light text-brand-darkCharcoal">4 类</span>
+                        <span class="block text-2xl sm:text-3xl font-light text-brand-darkCharcoal count-up" data-target="4" data-suffix=" 类">4 类</span>
                         <span class="block text-[10px] text-gray-400">内置免 Key 预设主力大模型</span>
                     </div>
                     <div class="space-y-1">
-                        <span class="block text-2xl sm:text-3xl font-light text-brand-cinnabar">30+ 门</span>
+                        <span class="block text-2xl sm:text-3xl font-light text-brand-cinnabar count-up" data-target="30" data-suffix="+ 门">30+ 门</span>
                         <span class="block text-[10px] text-gray-400">本地化工作流自学式技能</span>
                     </div>
                 </div>
@@ -217,7 +305,7 @@
             </div>
             
             <!-- 右侧：亮色系高保真 EasyHermes 桌面客户端 Mockup -->
-            <div class="lg:col-span-6 relative mt-8 lg:mt-0">
+            <div class="lg:col-span-6 relative mt-8 lg:mt-0 float-mockup">
                 <!-- 光源辐射层 -->
                 <div class="absolute -inset-2 rounded-2xl bg-gradient-to-r from-brand-accent/5 to-brand-cinnabar/5 opacity-40 blur-3xl"></div>
                 
@@ -339,7 +427,7 @@
     <!-- 极客核心理念 (致简篇) -->
     <section id="philosophy" class="py-24 bg-white border-t border-b border-black/[0.03] relative">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center max-w-2xl mx-auto mb-20 space-y-4">
+            <div class="text-center max-w-2xl mx-auto mb-20 space-y-4 reveal">
                 <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 极简致美 /</span>
                 <h2 class="title-serif text-3xl md:text-4xl text-brand-darkCharcoal font-black">告别繁杂配置，让 Agent 优雅落地</h2>
                 <p class="text-gray-500 font-serif text-sm">
@@ -349,7 +437,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
                 <!-- 零门槛 -->
-                <div class="ceramic-card p-8 rounded-xl transition-all duration-300 group">
+                <div class="ceramic-card glow-card p-8 rounded-xl transition-all duration-300 group reveal reveal-delay-1">
                     <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-brand-cinnabar/5 text-brand-cinnabar mb-6 group-hover:scale-105 transition-transform border border-brand-cinnabar/10">
                         <i class="fas fa-cubes text-base"></i>
                     </div>
@@ -360,7 +448,7 @@
                 </div>
 
                 <!-- Windows 原生适配 -->
-                <div class="ceramic-card p-8 rounded-xl transition-all duration-300 group">
+                <div class="ceramic-card glow-card p-8 rounded-xl transition-all duration-300 group reveal reveal-delay-2">
                     <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-brand-accent/5 text-brand-accent mb-6 group-hover:scale-105 transition-transform border border-brand-accent/10">
                         <i class="fas fa-desktop text-base"></i>
                     </div>
@@ -371,7 +459,7 @@
                 </div>
 
                 <!-- 预设模型 -->
-                <div class="ceramic-card p-8 rounded-xl transition-all duration-300 group">
+                <div class="ceramic-card glow-card p-8 rounded-xl transition-all duration-300 group reveal reveal-delay-3">
                     <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-emerald-500/5 text-emerald-600 mb-6 group-hover:scale-105 transition-transform border border-emerald-500/10">
                         <i class="fas fa-network-wired text-base"></i>
                     </div>
@@ -386,7 +474,7 @@
 
     <!-- 绝艺展示 (Features) - Bento 风格排版提升商业设计感 -->
     <section id="features" class="py-24 max-w-7xl mx-auto px-6">
-        <div class="text-center max-w-2xl mx-auto mb-20 space-y-4">
+        <div class="text-center max-w-2xl mx-auto mb-20 space-y-4 reveal">
             <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 核心绝艺 /</span>
             <h2 class="title-serif text-3xl md:text-4xl text-brand-darkCharcoal font-black">行止有据，运筹帷幄</h2>
         </div>
@@ -395,7 +483,7 @@
         <div class="grid grid-cols-12 gap-8 items-stretch">
             
             <!-- Bento Card 1: 技能自行沉淀系统 (大比例 7cols) -->
-            <div class="col-span-12 lg:col-span-7 ceramic-card rounded-2xl p-8 flex flex-col justify-between group transition-all duration-300">
+            <div class="col-span-12 lg:col-span-7 ceramic-card glow-card rounded-2xl p-8 flex flex-col justify-between group transition-all duration-300 reveal">
                 <div class="space-y-4">
                     <div class="text-brand-accent font-mono text-[10px] tracking-widest uppercase">SKILLS ACCUMULATION //</div>
                     <h3 class="title-serif text-xl sm:text-2xl text-brand-darkCharcoal font-bold">技能自主吐纳，遇敌即写 SKILL.md</h3>
@@ -418,7 +506,7 @@
             </div>
 
             <!-- Bento Card 2: 长期记忆温润层 (小比例 5cols) -->
-            <div class="col-span-12 lg:col-span-5 ceramic-card rounded-2xl p-8 flex flex-col justify-between group transition-all duration-300">
+            <div class="col-span-12 lg:col-span-5 ceramic-card glow-card rounded-2xl p-8 flex flex-col justify-between group transition-all duration-300 reveal reveal-delay-1">
                 <div class="space-y-4">
                     <div class="text-brand-accent font-mono text-[10px] tracking-widest uppercase">LONG-TERM MEMORY //</div>
                     <h3 class="title-serif text-xl sm:text-2xl text-brand-darkCharcoal font-bold">SQLite 高速索引，长存阁下印记</h3>
@@ -436,27 +524,27 @@
         </div>
     </section>
 
-    <!-- 【重点开发】云端书斋：互动文件中心 (Cloud File Center) -->
+    <!-- 【重点开发】产品仓库：互动文件中心 (Cloud File Center) -->
     <section id="cloud-bookcase" class="py-24 bg-brand-glaze/60 border-t border-b border-black/[0.03] relative">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4">
-                <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 云端书斋 /</span>
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4 reveal">
+                <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 产品仓库 /</span>
                 <h2 class="title-serif text-3xl md:text-4xl text-brand-darkCharcoal font-black">尊享分流安装包与配置文件</h2>
                 <p class="text-gray-500 font-serif text-sm">
                     点击下方任一卷宗，即可实时从云端镜像源拉取。我们已将所有平台的闭包、必读说明书及出厂配置文件收录于此，一触即达。
                 </p>
             </div>
 
-            <!-- 书斋高保真文件浏览器 -->
-            <div class="max-w-5xl mx-auto bg-white border border-black/[0.06] rounded-2xl shadow-soft-warm overflow-hidden">
-                <!-- 顶部页眉：深度致敬您提供的古风“云端书斋”截图 -->
+            <!-- 仓库高保真文件浏览器 -->
+            <div class="max-w-5xl mx-auto bg-white border border-black/[0.06] rounded-2xl shadow-soft-warm overflow-hidden reveal reveal-delay-1">
+                <!-- 顶部页眉：深度致敬您提供的古风“产品仓库”截图 -->
                 <div class="bg-[#FCFCFD] border-b border-black/[0.04] p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-center space-x-4">
                         <div class="bg-brand-cinnabar text-white font-serif font-bold text-xs px-2.5 py-1.5 rounded-sm">
                             归档
                         </div>
                         <div>
-                            <h3 class="font-serif text-lg sm:text-xl font-bold tracking-wide text-brand-darkCharcoal">云端书斋</h3>
+                            <h3 class="font-serif text-lg sm:text-xl font-bold tracking-wide text-brand-darkCharcoal">产品仓库</h3>
                             <div class="text-xs text-gray-400 font-serif mt-1 flex items-center space-x-2">
                                 <span>当前局所 (根目录)：</span>
                                 <span class="bg-[#EEF1F6] px-2 py-0.5 rounded text-brand-darkCharcoal font-mono font-bold text-[10px]">/EasyHermes</span>
@@ -469,7 +557,7 @@
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-xs">
                             <i class="fas fa-search"></i>
                         </span>
-                        <input type="text" id="file-search-input" oninput="filterFiles()" placeholder="在书斋中搜索卷宗..." class="bg-brand-glaze border border-black/[0.04] rounded-md pl-9 pr-4 py-2 text-xs w-full outline-none focus:border-brand-accent transition-colors text-brand-darkCharcoal">
+                        <input type="text" id="file-search-input" oninput="filterFiles()" placeholder="在仓库中搜索卷宗..." class="bg-brand-glaze border border-black/[0.04] rounded-md pl-9 pr-4 py-2 text-xs w-full outline-none focus:border-brand-accent transition-colors text-brand-darkCharcoal">
                     </div>
                 </div>
 
@@ -491,11 +579,40 @@
                     </table>
                 </div>
 
+                <!-- 历史版本折叠区 -->
+                <div class="border-t border-black/[0.04]">
+                    <button id="archive-toggle-btn" onclick="toggleArchive()" class="w-full px-6 py-3.5 flex items-center justify-between text-xs font-serif text-gray-500 hover:bg-[#FAFAFD] transition-colors">
+                        <span class="flex items-center gap-2">
+                            <i class="fas fa-clock-rotate-left text-[10px]"></i>
+                            <span>历史归档版本（V2 ~ V3.5）</span>
+                        </span>
+                        <i id="archive-arrow" class="fas fa-chevron-down text-[10px] transition-transform duration-300"></i>
+                    </button>
+                    <div id="archive-panel" class="hidden overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <tbody id="archive-table-body" class="divide-y divide-black/[0.02] text-xs sm:text-sm">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 飞书文档兜底下载提示 -->
+                <div class="border-t border-brand-accent/10 bg-brand-accent/[0.02] px-6 py-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-2 text-[11px] font-serif">
+                    <span class="inline-flex items-center gap-1.5 text-brand-accent font-bold shrink-0">
+                        <i class="fas fa-circle-info text-[10px]"></i> 下载提示：
+                    </span>
+                    <span class="text-gray-500">
+                        如云端下载较慢，也可前往
+                        <a href="https://my.feishu.cn/wiki/OFlCwnuLei057MknvRycbkL5nsb?from=from_copylink" target="_blank" class="text-brand-accent underline hover:text-brand-accentHover font-semibold">产品手册 1.2.1 章节</a>
+                        下载 EasyHermes 安装包。
+                    </span>
+                </div>
+
                 <!-- 底部服务器在线状态状态 -->
                 <div class="bg-[#FAFAFD] border-t border-black/[0.04] px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-gray-500 font-serif">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                        <span class="text-emerald-700 font-bold">书斋物理下载网关已联通 (Online)</span>
+                    <div id="sync-status" class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-gray-300 inline-block"></span>
+                        <span class="text-gray-400">正在同步产品仓库目录…</span>
                     </div>
                     <div class="flex items-center space-x-1 font-mono text-[10px]">
                         <span>MIRROR HOST:</span>
@@ -512,7 +629,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 
                 <!-- 沙盒说明 -->
-                <div class="lg:col-span-4 space-y-6">
+                <div class="lg:col-span-4 space-y-6 reveal">
                     <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 墨境沙盒 /</span>
                     <h2 class="title-serif text-3xl text-brand-darkCharcoal font-bold">探察 Workspace 协作乾坤</h2>
                     <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
@@ -531,7 +648,7 @@
                 </div>
                 
                 <!-- 沙盒高保真 Cursor IDE 控制台 -->
-                <div class="lg:col-span-8 ceramic-card rounded-2xl p-5 shadow-soft-warm relative">
+                <div class="lg:col-span-8 ceramic-card glow-card rounded-2xl p-5 shadow-soft-warm relative reveal reveal-delay-1">
                     <div class="absolute top-3.5 right-4 flex space-x-1.5">
                         <span class="w-2.5 h-2.5 rounded-full bg-brand-accent/40 inline-block"></span>
                         <span class="w-2.5 h-2.5 rounded-full bg-brand-accent/20 inline-block"></span>
@@ -609,7 +726,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             
             <!-- 硬件交互操作演示 -->
-            <div class="lg:col-span-7 ceramic-card rounded-2xl p-6 shadow-soft-warm relative order-last lg:order-first">
+            <div class="lg:col-span-7 ceramic-card glow-card rounded-2xl p-6 shadow-soft-warm relative order-last lg:order-first reveal">
                 <div class="absolute -top-12 -right-12 w-48 h-48 bg-brand-cinnabar/5 blur-3xl pointer-events-none"></div>
                 
                 <div class="flex items-center justify-between border-b border-black/[0.04] pb-3.5 mb-5">
@@ -686,7 +803,7 @@
             </div>
 
             <!-- 硬件概念解说 -->
-            <div class="lg:col-span-5 space-y-6">
+            <div class="lg:col-span-5 space-y-6 reveal reveal-delay-1">
                 <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 灵兽偶联 /</span>
                 <h2 class="title-serif text-3xl text-brand-darkCharcoal font-black">毛绒玩偶，一朝附灵</h2>
                 <p class="text-gray-500 text-xs sm:text-sm font-serif leading-relaxed">
@@ -713,12 +830,12 @@
     <!-- 答疑篇 (FAQ) -->
     <section id="faq" class="py-24 bg-gradient-to-b from-white to-brand-glaze/30 border-t border-b border-black/[0.03]">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center max-w-2xl mx-auto mb-20 space-y-4">
+            <div class="text-center max-w-2xl mx-auto mb-20 space-y-4 reveal">
                 <span class="text-brand-accent font-serif tracking-widest text-xs block">/ 问教篇 /</span>
                 <h2 class="title-serif text-3xl md:text-4xl text-brand-darkCharcoal font-black">常谈不厌，解惑答疑</h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-serif">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-serif reveal reveal-delay-1">
                 <!-- Q1 -->
                 <div class="ceramic-card p-6 rounded-lg space-y-3 hover:border-brand-accent/20 transition-colors duration-300">
                     <h3 class="text-sm sm:text-base text-brand-accent font-bold font-serif">Q: 双击启动无反应，或提示微软 Defender 危险警示？</h3>
@@ -765,6 +882,19 @@
             <p class="max-w-md mx-auto leading-relaxed text-[11px] text-gray-500 font-serif">
                 融合中式水墨风韵与极致桌面工程自动化，为您呈现绝无任何多余依赖的 AI 随行桌面灵宠。
             </p>
+
+            <!-- 秒创AI 生态品牌 -->
+            <div class="flex items-center justify-center gap-3 py-4 px-6 mx-auto max-w-lg bg-brand-glaze/40 border border-black/[0.04] rounded-lg">
+                <div class="text-left">
+                    <span class="text-[10px] text-gray-400 font-mono tracking-wider block">POWERED BY</span>
+                    <a href="https://wdl.best" target="_blank" class="text-brand-darkCharcoal font-serif font-bold text-sm tracking-wide hover:text-brand-accent transition-colors">秒创AI</a>
+                    <span class="text-[10px] text-gray-400 font-serif block">AI 解决方案杂货铺</span>
+                </div>
+                <div class="w-px h-8 bg-black/[0.06]"></div>
+                <a href="https://wdl.best" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 bg-brand-darkCharcoal hover:bg-black text-white text-[10px] font-serif font-bold tracking-widest rounded transition-all duration-300">
+                    访问秒创AI官网 <i class="fas fa-arrow-right text-[8px]"></i>
+                </a>
+            </div>
             
             <div class="flex items-center justify-center space-x-6 text-brand-darkCharcoal font-sans text-[11px] font-medium">
                 <a href="https://github.com/anthonyhermes/easyhermes" target="_blank" class="hover:text-brand-accent transition-colors"><i class="fab fa-github mr-1.5"></i> GitHub 官方仓库</a>
@@ -780,65 +910,112 @@
         </div>
     </footer>
 
-    <!-- 真实数据驱动：文件书斋系统脚本 -->
+    <!-- 真实数据驱动：文件仓库系统脚本 (动态拉取版) -->
     <script>
-        // 云端书斋镜像源基准地址
+        // 产品仓库镜像源基准地址
         const MIRROR_BASE = "http://8.130.64.144:8888/EasyHermes";
 
-        // 镜像源下的核心文件名录定义 - 完美收载所有的 Windows 和 Mac .zip 安装包及配置卷宗
-        const cloudFiles = [
-            {
-                name: "EasyHermes_Windows_x64_Portable.zip",
-                type: "Windows 便携免安装完整包 (包含嵌入式 Python 环境，一键解压即用)",
-                size: "52.4 MB",
-                date: "2026-05-26",
-                icon: "fa-file-zipper text-brand-cinnabar"
-            },
-            {
-                name: "EasyHermes_macOS_Silicon.tar.gz",
-                type: "macOS M系列苹果芯片原生运行归档文件",
-                size: "48.1 MB",
-                date: "2026-05-26",
-                icon: "fa-file-archive text-brand-accent"
-            },
-            {
-                name: "EasyHermes_macOS_Intel.tar.gz",
-                type: "macOS Intel系列芯片原生兼容归档文件",
-                size: "49.6 MB",
-                date: "2026-05-26",
-                icon: "fa-file-archive text-gray-400"
-            },
-            {
-                name: "easyhermes 必读.md",
-                type: "EasyHermes 核心 Workspace 初始化与运行读取规则必读手册",
-                size: "4.8 KB",
-                date: "2026-05-24",
-                icon: "fa-file-markdown text-blue-500"
-            },
-            {
-                name: "SOUL.md",
-                type: "易墨 AI 核心灵魂身份设定范例模本文件",
-                size: "2.1 KB",
-                date: "2026-05-24",
-                icon: "fa-file-code text-teal-600"
-            },
-            {
-                name: "AGENTS.md",
-                type: "特定工程项目规范约束与平级匹配提示词文件",
-                size: "1.2 KB",
-                date: "2026-05-24",
-                icon: "fa-file-code text-orange-500"
-            },
-            {
-                name: "config.yaml",
-                type: "Agent 行为及预设模型、记忆开关配置文件模版",
-                size: "852 B",
-                date: "2026-05-24",
-                icon: "fa-file-lines text-purple-500"
-            }
-        ];
+        // 运行时动态填充的文件列表
+        let cloudFiles = [];
+        let archiveFiles = [];
 
-        // 渲染书斋文件列表
+        // ---------- 文件智能分类规则 ----------
+        // 从文件名自动推断图标、分类描述、优先级
+        function classifyFile(name) {
+            const n = name.toLowerCase();
+            // 商用正式版 - 置顶推荐
+            if (/商用/i.test(name))       return { icon: "fa-crown text-brand-accent",      type: "商用正式版（最新发布，推荐下载）", priority: 1 };
+            // V5 桌面版 - 置顶推荐
+            if (/v5.*desktop/i.test(n))   return { icon: "fa-crown text-brand-accent",      type: "Windows 桌面版 V5（推荐下载）", priority: 1 };
+            // 通用便携包
+            if (n.includes("portable"))   return { icon: "fa-file-zipper text-brand-cinnabar", type: "Windows x64 便携免安装完整包（解压即用）", priority: 2 };
+            // macOS
+            if (n.includes("macos"))      return { icon: "fa-file-archive text-brand-accent", type: "macOS 原生运行归档文件", priority: 3 };
+            // 单文件 exe
+            if (n.endsWith(".exe"))       return { icon: "fa-terminal text-emerald-600",     type: "Windows 单文件可执行程序（轻量启动入口）", priority: 4 };
+            // workspace 模板
+            if (n.includes("workspace"))  return { icon: "fa-folder-open text-sky-500",      type: "EasyHermes 工作空间初始模板", priority: 5 };
+            // 历史桌面版 V2~V4
+            if (/v\d.*desktop/i.test(n))  return { icon: "fa-file-zipper text-gray-400",    type: "Windows 桌面历史版本", priority: 10 };
+            // 文档类
+            if (n.endsWith(".md"))        return { icon: "fa-file-markdown text-blue-500",   type: "项目说明文档", priority: 6 };
+            if (n.endsWith(".yaml") || n.endsWith(".yml"))
+                                          return { icon: "fa-file-lines text-purple-500",    type: "配置文件模版", priority: 7 };
+            // 其他 zip
+            if (n.endsWith(".zip"))       return { icon: "fa-file-zipper text-gray-500",     type: "压缩归档", priority: 8 };
+            // 兜底
+            return { icon: "fa-file text-gray-400", type: "文件", priority: 9 };
+        }
+
+        // ---------- 从云端 HTML 页面动态解析文件列表 ----------
+        async function fetchCloudFiles() {
+            try {
+                const resp = await fetch(MIRROR_BASE, { mode: "cors" });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const html = await resp.text();
+
+                // 用 DOMParser 解析 HTML，提取所有 class="file-link" 的链接文本
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+                const links = doc.querySelectorAll("a.file-link");
+                const names = Array.from(links).map(a => a.textContent.trim()).filter(Boolean);
+
+                if (names.length === 0) throw new Error("No files found");
+
+                // 分类并拆分：主文件 (priority <= 5) vs 历史归档 (priority > 5 且是旧版桌面包)
+                const mainList = [];
+                const archiveList = [];
+
+                names.forEach(name => {
+                    const info = classifyFile(name);
+                    const entry = { name, ...info };
+                    // 历史归档：V2~V4 的 Desktop 包
+                    if (info.priority === 10) {
+                        archiveList.push(entry);
+                    } else {
+                        mainList.push(entry);
+                    }
+                });
+
+                // 主文件按 priority 排序
+                mainList.sort((a, b) => a.priority - b.priority);
+                // 归档按版本号倒序（新的在前）
+                archiveList.sort((a, b) => {
+                    const va = parseInt(a.name.match(/v(\d+)/i)?.[1] || 0);
+                    const vb = parseInt(b.name.match(/v(\d+)/i)?.[1] || 0);
+                    return vb - va;
+                });
+
+                cloudFiles = mainList;
+                archiveFiles = archiveList;
+
+                // 更新状态指示器
+                updateSyncStatus(true, names.length);
+
+            } catch (err) {
+                console.warn("产品仓库动态拉取失败，使用本地缓存列表:", err.message);
+                updateSyncStatus(false, 0);
+            }
+
+            // 无论成功失败都渲染
+            renderFiles(cloudFiles);
+            renderArchive();
+        }
+
+        // 更新底部同步状态文字
+        function updateSyncStatus(ok, count) {
+            const el = document.getElementById("sync-status");
+            if (!el) return;
+            if (ok) {
+                el.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block"></span>
+                    <span class="text-emerald-700 font-bold">仓库已实时同步，共收录 ${count} 份卷宗</span>`;
+            } else {
+                el.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                    <span class="text-amber-700 font-bold">仓库同步暂不可用，已加载本地缓存目录</span>`;
+            }
+        }
+
+        // ---------- 渲染主文件列表 ----------
         function renderFiles(list) {
             const tbody = document.getElementById("file-table-body");
             tbody.innerHTML = "";
@@ -848,47 +1025,70 @@
                     <tr>
                         <td colspan="5" class="py-12 text-center text-gray-400 font-serif">
                             <i class="fas fa-folder-open text-3xl block mb-3 text-gray-300"></i>
-                            书斋幽深，未觅得相关卷宗墨迹
+                            仓库幽深，未觅得相关卷宗墨迹
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
                 return;
             }
 
             list.forEach(file => {
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-brand-glaze/30 transition-colors group";
-                
-                // 拼接绝对下载链接
-                const absoluteDownloadUrl = `${MIRROR_BASE}/${file.name}`;
-
+                const url = `${MIRROR_BASE}/${encodeURIComponent(file.name)}`;
                 tr.innerHTML = `
                     <td class="py-4.5 px-6 font-mono font-semibold text-brand-darkCharcoal flex items-center space-x-3">
                         <i class="fa-lg fas ${file.icon} group-hover:scale-110 transition-transform"></i>
                         <span class="hover:text-brand-accent transition-colors truncate max-w-xs sm:max-w-sm" title="${file.name}">${file.name}</span>
                     </td>
-                    <td class="py-4.5 px-4 text-xs text-gray-400 font-serif hidden md:table-cell">
-                        ${file.type}
-                    </td>
-                    <td class="py-4.5 px-4 text-xs font-mono text-gray-500 text-right">
-                        ${file.size}
-                    </td>
-                    <td class="py-4.5 px-4 text-xs font-mono text-gray-400 text-right hidden sm:table-cell">
-                        ${file.date}
-                    </td>
+                    <td class="py-4.5 px-4 text-xs text-gray-400 font-serif hidden md:table-cell">${file.type}</td>
+                    <td class="py-4.5 px-4 text-xs font-mono text-gray-500 text-right">—</td>
+                    <td class="py-4.5 px-4 text-xs font-mono text-gray-400 text-right hidden sm:table-cell">—</td>
                     <td class="py-4.5 px-6 text-center">
-                        <button onclick="downloadFile('${file.name}', '${absoluteDownloadUrl}')" class="bg-white hover:bg-brand-cinnabar hover:text-white border border-black/[0.06] hover:border-brand-cinnabar text-brand-darkCharcoal text-xs font-serif px-3 py-1.5 rounded transition-all duration-200 shadow-sm inline-flex items-center space-x-1 font-bold">
+                        <button onclick="downloadFile('${file.name.replace(/'/g, "\\'")}')" class="bg-white hover:bg-brand-cinnabar hover:text-white border border-black/[0.06] hover:border-brand-cinnabar text-brand-darkCharcoal text-xs font-serif px-3 py-1.5 rounded transition-all duration-200 shadow-sm inline-flex items-center space-x-1 font-bold">
                             <i class="fas fa-download text-[10px]"></i>
                             <span>极速下载</span>
                         </button>
-                    </td>
-                `;
+                    </td>`;
                 tbody.appendChild(tr);
             });
         }
 
-        // 真实下载动作触发器
-        function downloadFile(fileName, url) {
+        // ---------- 渲染历史归档 ----------
+        function renderArchive() {
+            const tbody = document.getElementById("archive-table-body");
+            const btn = document.getElementById("archive-toggle-btn");
+            tbody.innerHTML = "";
+
+            // 如果没有历史版本，隐藏整个折叠区
+            if (archiveFiles.length === 0) {
+                if (btn) btn.parentElement.classList.add("hidden");
+                return;
+            }
+            if (btn) btn.parentElement.classList.remove("hidden");
+
+            archiveFiles.forEach(file => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-brand-glaze/30 transition-colors group";
+                const url = `${MIRROR_BASE}/${encodeURIComponent(file.name)}`;
+                tr.innerHTML = `
+                    <td class="py-3 px-6 font-mono text-gray-500 flex items-center space-x-3">
+                        <i class="fas ${file.icon} text-[10px]"></i>
+                        <span class="truncate max-w-xs">${file.name}</span>
+                    </td>
+                    <td class="py-3 px-4 text-[11px] text-gray-400 font-serif hidden md:table-cell">${file.type}</td>
+                    <td class="py-3 px-4 text-[11px] font-mono text-gray-400 text-right hidden sm:table-cell">—</td>
+                    <td class="py-3 px-6 text-center">
+                        <button onclick="downloadFile('${file.name.replace(/'/g, "\\'")}')" class="border border-black/[0.06] hover:border-brand-cinnabar hover:text-brand-cinnabar text-gray-500 text-[11px] font-serif px-2.5 py-1 rounded transition-all duration-200 inline-flex items-center space-x-1">
+                            <i class="fas fa-download text-[9px]"></i><span>下载</span>
+                        </button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ---------- 下载 ----------
+        function downloadFile(fileName) {
+            const url = `${MIRROR_BASE}/${encodeURIComponent(fileName)}`;
             const logs = document.getElementById("hw-logs");
             const newLog = document.createElement("div");
             newLog.className = "text-brand-accent transition-all duration-300 py-0.5";
@@ -896,7 +1096,6 @@
             logs.appendChild(newLog);
             logs.scrollTop = logs.scrollHeight;
 
-            // 创建隐藏的 a 标签触发文件流拉取
             const a = document.createElement("a");
             a.href = url;
             a.download = fileName;
@@ -904,7 +1103,6 @@
             a.click();
             document.body.removeChild(a);
 
-            // 更新状态
             setTimeout(() => {
                 newLog.className = "text-emerald-600 transition-all duration-300 py-0.5 font-semibold";
                 newLog.innerHTML = `<span class="opacity-60 text-[9px] font-mono mr-1">[CLOUD]</span> 卷宗【${fileName}】已下发成功，请在您的本地下载路径中查收。`;
@@ -912,19 +1110,27 @@
             }, 850);
         }
 
-        // 检索过滤器
+        // ---------- 搜索过滤 ----------
         function filterFiles() {
             const query = document.getElementById("file-search-input").value.trim().toLowerCase();
-            const filtered = cloudFiles.filter(f => 
-                f.name.toLowerCase().includes(query) || 
+            const filtered = cloudFiles.filter(f =>
+                f.name.toLowerCase().includes(query) ||
                 f.type.toLowerCase().includes(query)
             );
             renderFiles(filtered);
         }
 
-        // 页面启动时默认装填文件
+        // ---------- 折叠切换 ----------
+        function toggleArchive() {
+            const panel = document.getElementById("archive-panel");
+            const arrow = document.getElementById("archive-arrow");
+            panel.classList.toggle("hidden");
+            arrow.style.transform = panel.classList.contains("hidden") ? "" : "rotate(180deg)";
+        }
+
+        // ---------- 页面加载时动态拉取 ----------
         window.onload = function() {
-            renderFiles(cloudFiles);
+            fetchCloudFiles();
         };
     </script>
 
@@ -1052,6 +1258,136 @@
                 trace2.setAttribute('stroke-dashoffset', '100');
             }, steps.length * 400 + 1000);
         }
+    </script>
+
+    <!-- ===== 科技商业感视觉增强脚本 ===== -->
+    <script>
+    (function() {
+        // ---- 1. Canvas 科技网格动画 ----
+        const canvas = document.getElementById('tech-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let w, h, dots = [], mouse = { x: -999, y: -999 };
+
+            function resize() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                w = canvas.width = rect.width;
+                h = canvas.height = rect.height;
+            }
+
+            function initDots() {
+                dots = [];
+                const gap = 60;
+                for (let x = 0; x < w; x += gap) {
+                    for (let y = 0; y < h; y += gap) {
+                        dots.push({
+                            x: x + (Math.random() - 0.5) * 10,
+                            y: y + (Math.random() - 0.5) * 10,
+                            ox: x, oy: y
+                        });
+                    }
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+                for (let i = 0; i < dots.length; i++) {
+                    const d = dots[i];
+                    const dx = d.x - mouse.x, dy = d.y - mouse.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const alpha = dist < 150 ? 0.15 * (1 - dist / 150) : 0.025;
+                    ctx.beginPath();
+                    ctx.arc(d.x, d.y, 1.2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(197, 155, 39, ${alpha})`;
+                    ctx.fill();
+
+                    // 连线
+                    for (let j = i + 1; j < dots.length; j++) {
+                        const d2 = dots[j];
+                        const ddx = d.x - d2.x, ddy = d.y - d2.y;
+                        const dd = Math.sqrt(ddx * ddx + ddy * ddy);
+                        if (dd < 80) {
+                            ctx.beginPath();
+                            ctx.moveTo(d.x, d.y);
+                            ctx.lineTo(d2.x, d2.y);
+                            ctx.strokeStyle = `rgba(15, 18, 29, ${0.03 * (1 - dd / 80)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(draw);
+            }
+
+            canvas.parentElement.addEventListener('mousemove', e => {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                mouse.x = e.clientX - rect.left;
+                mouse.y = e.clientY - rect.top;
+            });
+            canvas.parentElement.addEventListener('mouseleave', () => {
+                mouse.x = -999; mouse.y = -999;
+            });
+
+            resize();
+            initDots();
+            draw();
+            window.addEventListener('resize', () => { resize(); initDots(); });
+        }
+
+        // ---- 2. IntersectionObserver 滚动渐入 ----
+        const reveals = document.querySelectorAll('.reveal');
+        if (reveals.length) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.15 });
+            reveals.forEach(el => io.observe(el));
+        }
+
+        // ---- 3. 卡片鼠标跟随光晕 ----
+        document.querySelectorAll('.glow-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--glow-x', x + 'px');
+                card.style.setProperty('--glow-y', y + 'px');
+                // 更新 ::after 位置
+                const after = card.querySelector('::after');
+                card.style.cssText += `--glow-x:${x}px;--glow-y:${y}px;`;
+            });
+        });
+        // 通过 CSS 变量驱动光晕位置
+        const style = document.createElement('style');
+        style.textContent = `.glow-card::after { left: var(--glow-x, 50%); top: var(--glow-y, 50%); }`;
+        document.head.appendChild(style);
+
+        // ---- 4. 数字递增动画 ----
+        const countUps = document.querySelectorAll('.count-up');
+        if (countUps.length) {
+            const cuIo = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !entry.target.dataset.animated) {
+                        entry.target.dataset.animated = '1';
+                        const target = parseInt(entry.target.dataset.target);
+                        const suffix = entry.target.dataset.suffix || '';
+                        if (target === 0) return; // "0 依赖" 不需要递增
+                        let current = 0;
+                        const step = Math.max(1, Math.floor(target / 30));
+                        const timer = setInterval(() => {
+                            current += step;
+                            if (current >= target) { current = target; clearInterval(timer); }
+                            entry.target.textContent = current + suffix;
+                        }, 40);
+                    }
+                });
+            }, { threshold: 0.5 });
+            countUps.forEach(el => cuIo.observe(el));
+        }
+    })();
     </script>
 </body>
 </html>
